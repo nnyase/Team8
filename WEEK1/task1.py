@@ -1,7 +1,8 @@
 import cv2
 import numpy as np
 import os
-
+# Manage user input
+import sys
 
 # Read dataset images
 pathDataset = "../../WEEK1/BBDD/"
@@ -61,6 +62,9 @@ def computeDescriptors(imagesPath, outputPath):
     
     # Get file names of the database
     files = os.listdir(pathDataset)
+
+    # Asking the user if he wants to convert image into HSV colorspace
+    answer = query_yes_no("Do you want to convert image into HSV mode?")
     
     for file in files:
         # Check if it is an image
@@ -69,7 +73,10 @@ def computeDescriptors(imagesPath, outputPath):
             image = cv2.imread(pathDataset + file)
             
             # Here we can change the color space
-            
+
+            #convert the image into HSV
+            if answer == True:
+                hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
             
             histogram = createHistogram(image)
             
@@ -80,12 +87,42 @@ def computeDescriptors(imagesPath, outputPath):
     
     return descriptors
 
+# This function is used to get the answer of the user, "yes" or "no" and avoiding currents typing errors
+def query_yes_no(question, default="yes"):
+    """Ask a yes/no question via raw_input() and return their answer.
+
+    "question" is a string that is presented to the user.
+    "default" is the presumed answer if the user just hits <Enter>.
+            It must be "yes" (the default), "no" or None (meaning
+            an answer is required of the user).
+
+    The "answer" return value is True for "yes" or False for "no".
+    """
+    valid = {"yes": True, "y": True, "ye": True, "no": False, "n": False}
+    if default is None:
+        prompt = " [y/n] "
+    elif default == "yes":
+        prompt = " [Y/n] "
+    elif default == "no":
+        prompt = " [y/N] "
+    else:
+        raise ValueError("invalid default answer: '%s'" % default)
+
+    while True:
+        sys.stdout.write(question + prompt)
+        choice = input().lower()
+        if default is not None and choice == "":
+            return valid[default]
+        elif choice in valid:
+            return valid[choice]
+        else:
+            sys.stdout.write("Please respond with 'yes' or 'no' " "(or 'y' or 'n').\n")
 
 
 pathOutputBBDD = "./descriptorsBBDD/"
 pathOutputQ1 = "./descriptorsQ1/"
 pathOutputQ2 = "./descriptorsQ2/"
 
-computeDescriptors(pathDataset, pathOutputBBDD)
-computeDescriptors(pathQuery1, pathOutputQ1)
+# computeDescriptors(pathDataset, pathOutputBBDD)
+# computeDescriptors(pathQuery1, pathOutputQ1)
 
