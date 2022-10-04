@@ -28,6 +28,9 @@ def calculateHistogram(image):
 
 # By giving it a image, returns the concatenation of probability histograms related 
 # to that image
+# If a image has a background, then background pixels must have values out of [0,255]
+# and True value has to be given to the function as the second parameter, 
+# not to take into account in the histogram generation
 def createHistogram(image, background = False):
     
     # Save concatenation of histograms
