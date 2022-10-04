@@ -77,8 +77,9 @@ def computeDescriptors(imagesPath, outputPath):
             #convert the image into HSV
             if answer == True:
                 hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-            
-            histogram = createHistogram(image)
+                histogram = createHistogram(hsv_image)
+            else:
+                histogram = createHistogram(image)
             
             descriptorPath = outputPath + file[:-4] + ".npy"
             np.save(descriptorPath, histogram)
