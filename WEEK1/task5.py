@@ -66,6 +66,34 @@ def store_binary_mask():
 
 
 
+# METHOD 2
+# 1. Convert our image into Greyscale
+# 2. Perform simple thresholding to build a mask for the foreground and background
+# 3. Determine the foreground and background based on the mask
+# 4. Reconstruct original image by combining foreground and background
+
+def get_binary_mask2(myimage):
+    # First Convert to Grayscale
+    myimage_grey = cv2.cvtColor(myimage, cv2.COLOR_BGR2GRAY)
+    # Trunc thresholding - Truncate Thresholding ( THRESH_TRUNC ) ·
+    #The destination pixel is set to the threshold ( thresh ), if the source pixel value is greater than the threshold.
+    ret,baseline = cv2.threshold(myimage_grey,127,255,cv2.THRESH_TRUNC)
+    # Threshold to remove background from grayscaled image
+    ret,background = cv2.threshold(baseline,126,255,cv2.THRESH_BINARY)
+    # Threshold to extract the background from the grayscaled image
+    ret,foreground = cv2.threshold(baseline,126,255,cv2.THRESH_BINARY_INV)
+ 
+    foreground = cv2.bitwise_and(myimage,myimage, mask=foreground)  # Update foreground with bitwise_and to extract real foreground
+ 
+    # Convert black and white back into 3 channel greyscale
+    background = cv2.cvtColor(background, cv2.COLOR_GRAY2BGR)
+ 
+    # Combine the background and foreground to obtain our final image with background extracted
+    finalimage = background+foreground
+    return finalimage
+
+
+
 
 
 
