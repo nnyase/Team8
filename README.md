@@ -4,3 +4,4 @@
 Requiered packages:
  - Numpy
  - OpenCV
+ - Matplotlib
