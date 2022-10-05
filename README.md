@@ -5,3 +5,4 @@ Requiered packages:
  - Numpy
  - OpenCV
  - Matplotlib
+ - ml_metrics
