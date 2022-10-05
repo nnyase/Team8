@@ -4,14 +4,105 @@ import os
 # Manage user input
 import sys
 
-# Read dataset images
-pathDataset = "../../WEEK1/BBDD/"
-pathQuery1 = "../../WEEK1/qsd1_w1/"
-pathQuery2 = "../../WEEK1/qsd2_w1/"
 
+def changeBGRtoHSV(image):
+    """ Function to convert an image from BGR to HSV color space.
+    
 
-# By giving it a grayscale image, returns the histogram related to that image
-def calculateHistogram(image):
+    Parameters
+    ----------
+    image : np.array (uint8)
+        Image in BGR color space.
+
+    Returns
+    -------
+    hsv_image : np.array (uint8)
+        Image in HSV color space.
+
+    """
+    hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    
+    # Convert every channel to [0-255] range
+    hsv_image[:,:,0] = (hsv_image[:,:,0].astype(np.float64) * 255 / 179).astype(np.uint8)
+    
+    return hsv_image
+    
+def changeBGRtoYCRBC(image):
+    """ Function to convert an image from BGR to YCRBC color space.
+    
+
+    Parameters
+    ----------
+    image : np.array (uint8)
+        Image in BGR color space.
+
+    Returns
+    -------
+    ycrbc_image : np.array (uint8)
+        Image in YCRBC color space.
+
+    """
+    ycrbc_image = cv2.cvtColor(image, cv2.COLOR_BGR2YCrCb)
+    
+    return ycrbc_image  
+
+def changeBGRtoCIELAB(image):
+    """ Function to convert an image from BGR to CIELAB color space.
+    
+
+    Parameters
+    ----------
+    image : np.array (uint8)
+        Image in BGR color space.
+
+    Returns
+    -------
+    ycrbc_image : np.array (uint8)
+        Image in CIELAB color space.
+
+    """
+    cielab_image = cv2.cvtColor(image, cv2.COLOR_BGR2Lab)
+    
+    return cielab_image  
+
+def changeBGRtoCIELUV(image):
+    """ Function to convert an image from BGR to CIELUV color space.
+    
+
+    Parameters
+    ----------
+    image : np.array (uint8)
+        Image in BGR color space.
+
+    Returns
+    -------
+    ycrbc_image : np.array (uint8)
+        Image in CIELUV color space.
+
+    """
+    cieluv_image = cv2.cvtColor(image, cv2.COLOR_BGR2Luv)
+    
+    return cieluv_image
+
+def genHistoNoBackground(image, backgroundMask):
+    """ This function generates the histogram of a one channel image, not
+    taking into account the backgorund pixels.
+    
+
+    Parameters
+    ----------
+    image : numpy array (uint8)
+        One channel image.
+    backgroundMask: numpy array (uint8)
+        Binary mask of the background of the image.
+        
+    Returns
+    -------
+    histogram : numpy array (int)
+        The histogram related to the values of the input image.
+
+    """
+    
     # Create empty histogram
     histogram = np.array([0]*256)
     
@@ -19,20 +110,39 @@ def calculateHistogram(image):
     for i in range(image.shape[0]):
         for j in range(image.shape[1]):
             
-            # If the pixel value is not in [0,255] (can be a background pixel) ignore it
-            if image[i,j] <= 255 or image[i,j] >= 0:
+            # If the pixel is not part of the background take it into account
+            if backgroundMask[i,j] == 1:
                 
                 histogram[image[i,j]] += 1
             
 
     return histogram
 
-# By giving it a image, returns the concatenation of probability histograms related 
-# to that image
-# If a image has a background, then background pixels must have values out of [0,255]
-# and True value has to be given to the function as the second parameter, 
-# not to take into account in the histogram generation
-def createHistogram(image, background = False):
+
+def generateDescriptor(image, background = False, backgroundMask = None):
+    """ This function creates the descriptor of a three channel image. 
+    
+
+    Parameters
+    ----------
+    image : numpy array (uint8)
+        The image from which the descriptor will be generated.
+
+    background : boolean, optional
+        Parameter to state if the image has background related pixels,
+        not to take them into account in the decriptor generation process. 
+        The default value is False.
+    
+    backgroundMask : numpy array (uint8), optional
+        A binary mask image of the background.
+        
+
+    Returns
+    -------
+    finalProbabilityHistogram : numpy array (float)
+        Descriptor of the image.
+
+    """
     
     # Save concatenation of histograms
     finalProbabilityHistogram = np.array([], dtype = np.float64)
@@ -42,7 +152,7 @@ def createHistogram(image, background = False):
         
         # Get the histogram
         if background:
-            histogram = calculateHistogram(image[:,:,i])
+            histogram = genHistoNoBackground(image[:,:,i], backgroundMask)
         else:
             histogram, _  = np.histogram(image[:,:,i], bins = range(0,257))
         
@@ -54,37 +164,57 @@ def createHistogram(image, background = False):
 
     return finalProbabilityHistogram
 
-# By giving it a path to a image, returns a dictionary with every 
-# descriptor of images and saves the descriptors in the output folder
-def computeDescriptors(imagesPath, outputPath):
+
+def computeDescriptors(imagesPath, outputPath, colorSpace):
+    """ This function computes the descriptors of the images from the input path 
+    and save them in the output path.
+    
+
+    Parameters
+    ----------
+    imagesPath : string
+        The path were input images are.
+    outputPath : string
+        The path were descriptors will be saved.
+    colorSpace : string
+        The color space were the descriptors will be generated. 
+        rgb, hsv, cielab, cieluv, ycrbc are the options.
+
+    Returns
+    -------
+    descriptors : dictionary
+        A dictionary that contains the image file name and its descriptors.
+
+    """
+    
     
     descriptors = {}
     
     # Get file names of the database
     files = os.listdir(pathDataset)
-
-    # Asking the user if he wants to convert image into HSV colorspace
-    answer = query_yes_no("Do you want to convert image into HSV mode?")
     
     for file in files:
         # Check if it is an image
         if file[-4:] == ".jpg":
             
             image = cv2.imread(pathDataset + file)
-            
-            # Here we can change the color space
 
-            #convert the image into HSV
-            if answer == True:
-                hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-                histogram = createHistogram(hsv_image)
-            else:
-                histogram = createHistogram(image)
+            # Convert the image into the new color space
+            if colorSpace == "hsv":
+                image = changeBGRtoHSV(image)
+            elif colorSpace == "cielab":
+                image = changeBGRtoCIELAB(image)
+            elif colorSpace == "cieluv":
+                image = changeBGRtoCIELUV(image)
+            elif colorSpace == "ycrbc":
+                image = changeBGRtoYCRBC(image)
+            
+            descriptor = generateDescriptor(image)
             
             descriptorPath = outputPath + file[:-4] + ".npy"
-            np.save(descriptorPath, histogram)
+            np.save(descriptorPath, descriptor)
             
-            descriptors[file] = histogram
+            descriptors[file] = descriptor
     
     return descriptors
 
@@ -120,10 +250,18 @@ def query_yes_no(question, default="yes"):
             sys.stdout.write("Please respond with 'yes' or 'no' " "(or 'y' or 'n').\n")
 
 
+# Read dataset images
+pathDataset = "../../WEEK1/BBDD/"
+pathQuery1 = "../../WEEK1/qsd1_w1/"
+pathQuery2 = "../../WEEK1/qsd2_w1/"
+
+# Output descriptors
 pathOutputBBDD = "./descriptorsBBDD/"
 pathOutputQ1 = "./descriptorsQ1/"
 pathOutputQ2 = "./descriptorsQ2/"
 
-# computeDescriptors(pathDataset, pathOutputBBDD)
+
+colorSpace = "cielab"
+computeDescriptors(pathDataset, pathOutputBBDD, colorSpace)
 # computeDescriptors(pathQuery1, pathOutputQ1)
 
