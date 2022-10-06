@@ -25,8 +25,8 @@ def changeBGRtoHSV(image):
     
     return hsv_image
     
-def changeBGRtoYCRBC(image):
-    """ Function to convert an image from BGR to YCRBC color space.
+def changeBGRtoYCBCR(image):
+    """ Function to convert an image from BGR to YCBCR color space.
     
 
     Parameters
@@ -37,12 +37,12 @@ def changeBGRtoYCRBC(image):
     Returns
     -------
     ycrbc_image : np.array (uint8)
-        Image in YCRBC color space.
+        Image in YCBCR color space.
 
     """
-    ycrbc_image = cv2.cvtColor(image, cv2.COLOR_BGR2YCrCb)
+    ycbcr_image = cv2.cvtColor(image, cv2.COLOR_BGR2YCrCb)
     
-    return ycrbc_image  
+    return ycbcr_image  
 
 def changeBGRtoCIELAB(image):
     """ Function to convert an image from BGR to CIELAB color space.
@@ -185,7 +185,7 @@ def computeDescriptors(imagesPath, outputPath, colorSpace, background = False,
         The path were descriptors will be saved.
     colorSpace : string
         The color space were the descriptors will be generated. 
-        rgb, hsv, cielab, cieluv, ycrbc are the options.
+        rgb, hsv, cielab, cieluv, ycbcr are the options.
     background : boolean, optional
         Parameter to state if the image has background related pixels,
         not to take them into account in the decriptor generation process. 
@@ -223,8 +223,8 @@ def computeDescriptors(imagesPath, outputPath, colorSpace, background = False,
                 image = changeBGRtoCIELAB(image)
             elif colorSpace == "cieluv":
                 image = changeBGRtoCIELUV(image)
-            elif colorSpace == "ycrbc":
-                image = changeBGRtoYCRBC(image)
+            elif colorSpace == "ycbcr":
+                image = changeBGRtoYCBCR(image)
             
             if background:
                 # Read binary mask
