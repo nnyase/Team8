@@ -5,16 +5,22 @@ import os
 import sys
 
 
+#############################################
+##Task 3 starts at line 135                 #
+#############################################
+
+
+
+
+
 #SimilarityFromDescriptors def:
 ###############################################################################
-# By givin to descriptor paths to the "def SimilarityFromDescriptor" It'll    #
+# By givin two descriptor paths to the "def SimilarityFromDescriptor" It'll   #
 # calculate the similarity using  Euclidean distance, L1 distance, Hellinger  #
-# kernel and (will add more today), then a graph will be displayed showing    #
-# both histograms and will print the values on the console                    #
+# kernel and (will add more ), then a graph will be displayed showing         #
+# both histograms (if the last parameter is activated) and will print the     #
+#values on the console                                                        #
 ###############################################################################    
-## Instance declared at line 130
-
-
 
 #SimilarityFromImages def:
 ##################################################################################
@@ -126,7 +132,7 @@ def Hellinger_kernel(con,testCon):
     return HK_Result
 
 
-#####TASK 2#################################################
+#####TASK 3 #################################################
 ###### Same as Task2 but applied to all descriptors on DDBB 
 ###### for each descriptor in Q1
 def PathBuilder(i):
