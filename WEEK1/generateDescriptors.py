@@ -98,11 +98,16 @@ def genHistoNoBackground(image, backgroundMask):
     -------
     histogram : numpy array (int)
         The histogram related to the values of the input image.
+    numPix : int
+        The number of pixels that are from the foreground.
 
     """
     
     # Create empty histogram
     histogram = np.array([0]*256)
+    
+    # Check how much pixels are from foreground
+    numPix = 0
     
     # Check every pixel
     for i in range(image.shape[0]):
@@ -112,9 +117,10 @@ def genHistoNoBackground(image, backgroundMask):
             if backgroundMask[i,j] == 1:
                 
                 histogram[image[i,j]] += 1
+                numPix += 1
             
 
-    return histogram
+    return histogram, numPix
 
 
 def generateDescriptor(image, background = False, backgroundMask = None):
@@ -150,12 +156,14 @@ def generateDescriptor(image, background = False, backgroundMask = None):
         
         # Get the histogram
         if background:
-            histogram = genHistoNoBackground(image[:,:,i], backgroundMask)
+            histogram, numPixels = genHistoNoBackground(image[:,:,i], backgroundMask)
+            # Get probability distribution
+            histogram = histogram.astype(np.float32) / numPixels
         else:
             histogram, _  = np.histogram(image[:,:,i], bins = range(0,257))
+            # Get probability distribution
+            histogram = histogram.astype(np.float32) / (image.shape[0]*image.shape[1])
         
-        # Get probability distribution
-        histogram = histogram.astype(np.float32) / (image.shape[0]*image.shape[1])
         
         # Concatenate
         finalProbabilityHistogram = np.concatenate((finalProbabilityHistogram,histogram))
