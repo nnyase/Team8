@@ -125,6 +125,6 @@ def Hellinger_kernel(con,testCon):
     return HK_Result
 
 
-pathfromBBDD = "./descriptorsBBDD/bbdd_00067.npy"
-pathfromQ1 = "./descriptorsQ1/bbdd_00027.npy"
+pathfromBBDD = "./descriptors/descriptors_BBDD_rgb/bbdd_00067.npy"
+pathfromQ1 = "./descriptors/descriptors_qsd1_w1_rgb/00027.npy"
 SimilarityFromDescriptors(pathfromBBDD,pathfromQ1)
