@@ -5,6 +5,7 @@ from numpy import dot
 import matplotlib.pyplot as plt #importing matplotlib
 import os
 import sys
+import pickle
 
 
 #############################################
@@ -222,12 +223,40 @@ def saveBestKmatches(bbddDescriptorsPath, qDescriptorsPath, k, distanceFunc):
     
     return result
 
-pathfromBBDD = "./descriptors/descriptors_BBDD_rgb/" 
-pathfromQ1 = "./descriptors/descriptors_qsd1_w1_rgb/"
+pathfromBBDD = "WEEK1/descriptors/descriptors_BBDD_rgb/" 
+pathfromQ1 = "WEEK1/descriptors/descriptors_qsd1_w1_rgb/"
+
+# Store k best matches for every query image in a pkl file
+def store_in_pkl(pathfromBBDD, pathfromQ):
+    # Open the file result.pkl and create it if it doesn't exist
+    with open('result.pkl', 'wb') as f:
+        pickle.dump(saveBestKmatches(pathfromBBDD, pathfromQ, 5, EuclidianDistance), f)
+
+# Read the pkl file 
+def read_pkl():
+    with open('result.pkl', 'rb') as f:
+        result = pickle.load(f)
+        print(result)
+
+# Function to store k best matches for every query image in a pkl file
+store_in_pkl(pathfromBBDD, pathfromQ1)
+# Print k best matches for every query image
+read_pkl()
 
 
 
-saveBestKmatches(pathfromBBDD, pathfromQ1, 5, EuclidianDistance)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
