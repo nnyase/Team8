@@ -51,21 +51,6 @@ def store_binary_mask():
                 cv2.imwrite(filename, get_binary_mask(image))
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # METHOD 2
 # 1. Convert our image into Greyscale
 # 2. Perform simple thresholding to build a mask for the foreground and background
@@ -93,8 +78,35 @@ def get_binary_mask2(myimage):
     bg = cv2.bitwise_not(background)
     return bg
 
+#METHOD 3
+#Convert our image into HSV color space
+#Perform simple thresholding to create a map using Numpy based on Saturation and Value
+#Combine the map from S and V into a final mask
+#Determine the foreground and background based on the combined mask
+#Reconstruct original image by combining extracted foreground and background
 
-
+def get_binary_mask3(myimage):
+    
+    myimage_hsv = cv2.cvtColor(myimage, cv2.COLOR_BGR2HSV)
+     
+    #Take S and remove any value that is less than half
+    s = myimage_hsv[:,:,1]
+    s = np.where(s < 127, 0, 1) # Any value below 127 will be excluded
+ 
+    # We increase the brightness of the image and then mod by 255
+    v = (myimage_hsv[:,:,2] + 127) % 255
+    v = np.where(v > 127, 1, 0)  # Any value above 127 will be part of our mask
+ 
+    # Combine our two masks based on S and V into a single "Foreground"
+    foreground = np.where(s+v > 0, 1, 0).astype(np.uint8)  #Casting back into 8bit integer
+ 
+    background = np.where(foreground==0,255,0).astype(np.uint8) # Invert foreground to get background in uint8
+    background = cv2.cvtColor(background, cv2.COLOR_GRAY2BGR)  # Convert background back into BGR space
+    foreground=cv2.bitwise_and(myimage,myimage,mask=foreground) # Apply our foreground map to original image
+    finalimage = background+foreground # Combine foreground and background
+    binary_mask = cv2.bitwise_not(background)
+ 
+    return binary_mask
 
 
 
