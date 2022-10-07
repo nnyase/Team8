@@ -90,7 +90,8 @@ def get_binary_mask2(myimage):
  
     # Combine the background and foreground to obtain our final image with background extracted
     finalimage = background+foreground
-    return finalimage
+    bg = cv2.bitwise_not(background)
+    return bg
 
 
 
