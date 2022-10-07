@@ -3,7 +3,9 @@ import cv2
 import os
 import glob
 import numpy as np
-from tqdm import tqdm
+#from tqdm import tqdm
+
+
 
 def apk(actual, predicted, k=10):
     """
@@ -62,19 +64,40 @@ def mapk(actual, predicted, k=10):
     return np.mean([apk(a,p,k) for a,p in zip(actual, predicted)])
 
 
+# Task 4 Evaluation of image retrieval
+
+pathPredicted = "./result.pkl"
+pathGT = "../../WEEK1/qsd1_w1/gt_corresps.pkl"
+
+from task3 import read_pkl
+
+# Read results
+
+gtResults = read_pkl(pathGT)
+predictedResults = read_pkl(pathPredicted)
+
+
+#mapkValue0 = compute_mapk(gtResults,predictedResults,3)
+mapkValue = mapk(gtResults, predictedResults, 3)
+
+mapkValue2 = ml_metrics.mapk(gtResults, predictedResults, 1)
+
+
+
+
 # Task 6  Evaluation using MAP@K of binary masks
 # Actual  Correct binary Mask given
 # Predicted Query 2 binary mask results 
 
-actual = [cv2.imread(file).tolist() for file in tqdm(glob.glob("qsd2_w1/*.png"))]
-predicted = [cv2.imread(file).tolist() for file in tqdm(glob.glob("WEEK1/q2_result/*.png"))]
+#actual = [cv2.imread(file).tolist() for file in tqdm(glob.glob("qsd2_w1/*.png"))]
+#predicted = [cv2.imread(file).tolist() for file in tqdm(glob.glob("WEEK1/q2_result/*.png"))]
 
 
-metric = ml_metrics.mapk(actual=actual,
-                      predicted=predicted, k=1)
+#metric = ml_metrics.mapk(actual=actual,
+#                      predicted=predicted, k=1)
 
-print("MAP@K Score: {:.4f}% ({}/{})".format(metric*100,
-      int(len(actual)*metric), len(predicted)))
+#print("MAP@K Score: {:.4f}% ({}/{})".format(metric*100,
+#      int(len(actual)*metric), len(predicted)))
 
 
 
