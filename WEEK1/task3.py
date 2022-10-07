@@ -1,5 +1,7 @@
 import cv2
 import numpy as np
+from numpy.linalg import norm
+from numpy import dot
 import matplotlib.pyplot as plt #importing matplotlib
 import os
 import sys
