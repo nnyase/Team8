@@ -132,7 +132,19 @@ def Hellinger_kernel(con,testCon):
     #    print("Hellinger Kernel distance")
     #    print(HK_Result)
     return HK_Result
-
+# Histogram Intersection
+def Hist_Intersection(con,testCon):
+    HI=0
+    for i in range(len(con)):
+        HI += min(con[i], testCon[i])
+        #print("Histogram Intersection")
+        #print(HI)
+    return HI
+def Cosine_Similarity(con,testCon):
+    cos_sim = dot(con, testCon)/(norm(con)*norm(testCon))
+    #print("Cosine similarity")
+    #print(cos_sim)
+    return cos_sim
 
 #####TASK 3 #################################################
 ###### Same as Task2 but applied to all descriptors on DDBB 
