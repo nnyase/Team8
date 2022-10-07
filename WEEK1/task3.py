@@ -34,18 +34,20 @@ import sys
 
 
 
-def SimilarityFromDescriptors(path1,path2,activatePlot):
+def SimilarityFromDescriptors(path1,path2,activatePlot , distanceFunction):
+    # Load descriptors
     DDBB = np.load(path1)
     Q1   = np.load(path2) 
-    EuclidianDistance(DDBB, Q1)
-    L1_Distance(DDBB, Q1)
-    X2_Distance(DDBB, Q1)
-    Hellinger_kernel(DDBB, Q1)
+    
+    # Calculate distance
+    distance = distanceFunction(DDBB, Q1)
+    
     if activatePlot:      
         plt.plot(DDBB)
         plt.plot(Q1)
         plt.show()
-    return
+    
+    return distance
 
 def SimilarityFromImages(img_path1,img_path2):
     #Image1
@@ -87,8 +89,8 @@ def EuclidianDistance(con,testCon):
         integral= integral + EuclidianDistance
     else:
         ED_Result=integral**.5
-        print("Euclidian distance")
-        print(ED_Result)
+    #    print("Euclidian distance")
+    #    print(ED_Result)
     return ED_Result
   
   
@@ -101,8 +103,8 @@ def L1_Distance(con,testCon):
     
     else:
         L1_Result=integral
-        print("L1 distance")
-        print(L1_Result)
+    #    print("L1 distance")
+    #    print(L1_Result)
     return L1_Result
     
 #X2 distance
@@ -114,8 +116,8 @@ def X2_Distance(con,testCon):
     
     else:
         x2_Result=integral
-        print("x2 distance")
-        print(x2_Result)
+    #    print("x2 distance")
+    #    print(x2_Result)
     return x2_Result
   
 #Hellinger kernel 
@@ -127,8 +129,8 @@ def Hellinger_kernel(con,testCon):
     
     else:
         HK_Result=integral
-        print("Hellinger Kernel distance")
-        print(HK_Result)
+    #    print("Hellinger Kernel distance")
+    #    print(HK_Result)
     return HK_Result
 
 
@@ -146,21 +148,72 @@ def PathBuilder(i):
         path = "00"+str(i)+".npy"  
     return path
   
-pathfromBBDD = "./descriptors/descriptors_BBDD_rgb/bbdd_" 
-pathfromQ1 = "./descriptors/descriptors_qsd1_w1_rgb/"
-#SimilarityFromDescriptors(pathfromBBDD,pathfromQ1)
 
-
-for i in range(28):
-    descriptors_Q1_Path = pathfromQ1 + PathBuilder(i)
-    for j in range(285):
-        descriptors_DDBB_Path = pathfromBBDD + PathBuilder(j)
-        SimilarityFromDescriptors(descriptors_Q1_Path,descriptors_DDBB_Path,False)
-        print ("Q1 No:")
-        print(str(i))
-        print ("vs ddbb No:")
-        print(str(j))
+# Task4
+def saveBestKmatches(bbddDescriptorsPath, qDescriptorsPath, k, distanceFunc):
+    """ This function computes all the similarities between the database and query images
+        using the distance function given and returns k best matches for every query image
     
+
+    Parameters
+    ----------
+    bbddDescriptorsPath : string
+        Path of the folder where .npy descriptor files of the database are stored.
+    qDescriptorsPath : string
+        Path of the folder where .npy descriptor files of the query images are stored..
+    k : int
+        Quantity of best matches is returned.
+    distanceFunc : function
+        Distance function that will be used to compute the similarities.
+
+    Returns
+    -------
+    result : list of lists (int)
+        The best k matches for each image in the query. The k matches are sorted from
+        the most similar to the least one.
+
+    """
+    
+    # Create results list of lists
+    result = [[-1.]*k for i in range(28)]
+    
+    
+    # For every image in query
+    for i in range(28):
+        
+        # Get descriptor path
+        descriptors_Q1_Path = qDescriptorsPath + PathBuilder(i)
+        
+        # Create list of distances
+        distances = np.array([-1.]*285)
+        
+        # For every image in BBDD
+        for j in range(285):
+            
+            # Get descriptor path
+            descriptors_DDBB_Path = bbddDescriptorsPath + "bbdd_" + PathBuilder(j)
+            
+            # Calculate distance
+            distance = SimilarityFromDescriptors(descriptors_Q1_Path,
+                                                 descriptors_DDBB_Path,False, distanceFunc)
+            
+            # Save distance
+            distances[j] = distance
+
+        # Sort the distances and get k smallest values indexes
+        sortedIndexes = np.argsort(distances)
+        
+        # Save results in the list
+        result[i][:] = sortedIndexes[:k]
+    
+    return result
+
+pathfromBBDD = "./descriptors/descriptors_BBDD_rgb/" 
+pathfromQ1 = "./descriptors/descriptors_qsd1_w1_rgb/"
+
+
+
+saveBestKmatches(pathfromBBDD, pathfromQ1, 5, EuclidianDistance)
 
 
 
