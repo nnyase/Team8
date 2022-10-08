@@ -37,7 +37,7 @@ def genHistoNoBackground(image, backgroundMask):
         for j in range(image.shape[1]):
             
             # If the pixel is not part of the background take it into account
-            if backgroundMask[i,j] == 1:
+            if backgroundMask[i,j] == 255:
                 
                 histogram[image[i,j]] += 1
                 numPix += 1
@@ -129,11 +129,6 @@ def computeDescriptors(imagesPath, outputPath, colorSpace, background = False,
     # Get file names of the database
     files = os.listdir(imagesPath)
     
-    # Create output folder
-    resultsPath = outputPath + "descriptors_" + imagesPath.split('/')[-2] + "_" + colorSpace + "/"  
-    if not os.path.exists(resultsPath):
-        os.mkdir(resultsPath)
-    
     for file in files:
         # Check if it is an image
         if file[-4:] == ".jpg":
@@ -152,12 +147,12 @@ def computeDescriptors(imagesPath, outputPath, colorSpace, background = False,
             
             if background:
                 # Read binary mask
-                binaryMask = cv2.imread(backgroundMaskDir + file[:-4] + ".png")
+                binaryMask = cv2.imread(backgroundMaskDir + file[:-4] + ".png", cv2.IMREAD_GRAYSCALE)
                 descriptor = generateDescriptor(image, background, binaryMask)
             else:
                 descriptor = generateDescriptor(image)
             
-            descriptorPath = resultsPath + file[:-4] + ".npy"
+            descriptorPath = outputPath + file[:-4] + ".npy"
             np.save(descriptorPath, descriptor)
             
             descriptors[file] = descriptor

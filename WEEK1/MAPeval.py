@@ -1,10 +1,9 @@
 from ml_metrics import mapk
 from utils.managePKLfiles import read_pkl
 
-
-
 if __name__ == "__main__":
 
+    
     # Args
     pathPredictions = "./results/qsd1/"
     pathGT = "../../WEEK1/qsd1_w1/gt_corresps.pkl"

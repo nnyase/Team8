@@ -45,7 +45,7 @@ def X2_Distance(con,testCon):
     return x2_Result
   
 #Hellinger kernel 
-def Hellinger_kernel(con,testCon):
+def Hellinger_distance(con,testCon):
     integral=0
     for i in range(len(con)):
         HK= (con[i]**.5-testCon[i]**.5)**2

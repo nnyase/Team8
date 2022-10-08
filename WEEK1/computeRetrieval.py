@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt #importing matplotlib
 import os
-from utils.distanceMetrics import EuclidianDistance, L1_Distance, X2_Distance, Hellinger_kernel, Hist_Intersection, Cosine_Similarity
+from utils.distanceMetrics import EuclidianDistance, L1_Distance, X2_Distance, Hellinger_distance, Hist_Intersection, Cosine_Similarity
 from utils.managePKLfiles import store_in_pkl
 
 
@@ -58,7 +58,7 @@ def SimilarityFromImages(img_path1,img_path2):
     EuclidianDistance(con1, con2)
     L1_Distance(con1,con2)
     X2_Distance(con1, con2)
-    Hellinger_kernel(con1,con2)
+    Hellinger_distance(con1,con2)
     plt.plot(con1)
     plt.plot(con2)
     plt.show()
@@ -113,6 +113,21 @@ def saveBestKmatches(bbddDescriptorsPath, qDescriptorsPath, k, distanceFunc):
     result = [[-1.]*k for i in range(numQ)]
     
     
+    # Get distance function
+    if distanceFunc == "euclidean":
+        distanceFunc = EuclidianDistance
+    elif distanceFunc == "l1":
+        distanceFunc = L1_Distance
+    elif distanceFunc == "x2":
+        distanceFunc = X2_Distance
+    elif distanceFunc == "hellinger":
+        distanceFunc = Hellinger_distance
+    elif distanceFunc == "histIntersect":
+        distanceFunc = Hist_Intersection
+    elif distanceFunc == "cosSim":
+        distanceFunc = Cosine_Similarity
+        
+    
     # For every image in query
     for i in range(numQ):
         
@@ -153,11 +168,9 @@ if __name__ == "__main__":
     colorSpaces = ["rgb","hsv","cielab", "cieluv", "ycbcr"]
     pathOutput = "./results/qsd1/"
     k = 10
-    #distanceFuncs = [EuclidianDistance, L1_Distance, X2_Distance, Hellinger_kernel, 
-    #                 Hist_Intersection, Cosine_Similarity]
-    distanceFuncs = [Hellinger_kernel, Hist_Intersection, Cosine_Similarity]
-    #distanceFuncsStr = ["euclidean", "l1", "x2", "hellinger", "histIntersect", "cosSim"]
-    distanceFuncsStr = ["hellinger", "histIntersect", "cosSim"]
+    distanceFuncs = [EuclidianDistance, L1_Distance, X2_Distance, Hellinger_distance, 
+                     Hist_Intersection, Cosine_Similarity]
+    distanceFuncsStr = ["euclidean", "l1", "x2", "hellinger", "histIntersect", "cosSim"]
     
     
     # Compute result for every descriptor color space

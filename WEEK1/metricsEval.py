@@ -1,5 +1,3 @@
-from email import parser
-from os import SCHED_OTHER
 import numpy as np
 import cv2
 from tqdm import tqdm
@@ -41,11 +39,11 @@ def performance_accumulation_pixel(actual, predicted):
     """ 
     TP_list, FN_list, FP_list = [],[],[]
     for image_actual, image_pred in zip(actual, predicted):
-        mask_actual = image_actual[:, :, 0]/255
-        mask_predicted = image_pred[:, :, 0]/255
-        TP = np.sum(cv2.bitwise_and(mask_actual, mask_predicted))
-        FN = np.sum(cv2.bitwise_and(mask_actual, cv2.bitwise_not(mask_predicted)))
-        FP = np.sum(cv2.bitwise_and(cv2.bitwise_not(mask_actual), mask_predicted))
+        mask_actual = image_actual[:, :, 0]#/255
+        mask_predicted = image_pred[:, :, 0]#/255
+        TP = np.sum(cv2.bitwise_and(mask_actual, mask_predicted)) / 255
+        FN = np.sum(cv2.bitwise_and(mask_actual, cv2.bitwise_not(mask_predicted))) / 255
+        FP = np.sum(cv2.bitwise_and(cv2.bitwise_not(mask_actual), mask_predicted)) / 255
         TP_list.append(TP)
         FN_list.append(FN)
         FP_list.append(FP)
