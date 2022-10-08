@@ -35,4 +35,20 @@ Options:
 ### Image retrieval evaluation
 
 
+
+
 ### Background removal evaluation
+
+``
+$ metricsEval.py [-aDir actual_input_dir] [-pDir predicted_input_dir]
+``
+```
+Options:
+
+  -aDir, actual_input_dir       path to the actual/ ground-truth background masks images folder.
+  
+  -pDir, predicted_input_dir      path to the predicted background mask image folder.
+ 
+  Default = None
+
+```

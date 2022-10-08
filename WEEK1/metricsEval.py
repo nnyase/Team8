@@ -1,14 +1,24 @@
+from email import parser
 from os import SCHED_OTHER
 import numpy as np
 import cv2
 from tqdm import tqdm
 import glob
+import argparse
+import os
+
+def parse_args():
+    parser = argparse.ArgumentParser(description= 'Generate Precision, Recall and F1 for list of images')
+    parser.add_argument('-aDir', '--actual_input_dir', type=str, help='Path of Actual images')
+    parser.add_argument('-pDir', '--predicted_input_dir', type=str, help='Path of predicted images')
+    return parser.parse_args()
 
 # Calculates the F1, P, Recall and also the TP,FN,FP of a list of images
+def read_images_from_dir(actual,predicted):
+    actual_imgs = [cv2.imread(file) for file in tqdm(glob.glob(actual))]
+    predicted_imgs = [cv2.imread(file) for file in tqdm(glob.glob(predicted))]
+    return actual_imgs, predicted_imgs
 
-
-actual = [cv2.imread(file) for file in tqdm(glob.glob("qsd2_w1/*.png"))]
-predicted = [cv2.imread(file) for file in tqdm(glob.glob("WEEK1/q2_result/*.png"))]
 
 
 def performance_accumulation_pixel(actual, predicted):
@@ -65,12 +75,36 @@ def metrics(TP_list,FN_list,FP_list):
         r_list.append(R)
         f1_list.append(F1)
     p, r, f1 = np.sum(p_list)/len(TP_list), np.sum(r_list)/len(TP_list), np.sum(f1_list)/len(TP_list)
+    
+    return print("Precision: ", p,"Recall: ", r,"F1 score:", f1)
 
-    return p, r, f1
+#TP,FP,TN = performance_accumulation_pixel(actual,predicted)
+#p,r,f1 = metrics(TP,FP,TN)
+def dir_path(string):
+    if os.path.isdir(string):
+        print(string," is a path")
+        return string
+    else:
+        return "Not a path"
 
-TP,FP,TN = performance_accumulation_pixel(actual,predicted)
-p,r,f1 = metrics(TP,FP,TN)
 
-print("Precision: ", p,"Recall: ", r,"F1 score:", f1)
-#print("True Positive: ", sum(TP)/len(TP),"False Positive: ",sum(FP)/len(FP),"True Negative: ",sum(TN)/len(TN))
-#print(TP)
+def load_images_from_folder(folder):
+    images = []
+    for filename in tqdm(os.listdir(folder)):
+        if filename[-4:] == ".png":
+            img = cv2.imread(os.path.join(folder,filename))
+            images.append(img)
+    return images
+
+
+
+
+if __name__ == "__main__":
+    args = parse_args()
+    act = dir_path(args.actual_input_dir)
+    pred = dir_path(args.predicted_input_dir)
+    actual_imgs=load_images_from_folder(act)
+    predicted_imgs = load_images_from_folder(pred)
+    TP, FN, FP = performance_accumulation_pixel(actual=actual_imgs, predicted=predicted_imgs)
+    metrics(TP,FN,FP)
+
