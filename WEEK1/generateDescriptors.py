@@ -131,7 +131,8 @@ def computeDescriptors(imagesPath, outputPath, colorSpace, background = False,
     
     # Create output folder
     resultsPath = outputPath + "descriptors_" + imagesPath.split('/')[-2] + "_" + colorSpace + "/"  
-    os.mkdir(resultsPath)
+    if not os.path.exists(resultsPath):
+        os.mkdir(resultsPath)
     
     for file in files:
         # Check if it is an image
@@ -167,17 +168,19 @@ def computeDescriptors(imagesPath, outputPath, colorSpace, background = False,
 
 if __name__ == "__main__":
 
-    input_dir = "../../WEEK1/qsd1_w1/"
+    input_dir = "../../WEEK1/BBDD/"
     output_dir = "./descriptors/"
-    color_space = "hsv"
+    color_spaces = ["rgb","hsv","cielab", "cieluv", "ycbcr"]
     
     mask_dir = 'None'
     
-    if mask_dir != 'None':
-        computeDescriptors(input_dir, output_dir, color_space, True, mask_dir)
-    else:
-        computeDescriptors(input_dir, output_dir, color_space)
-        
+    for color_space in color_spaces:
+    
+        if mask_dir != 'None':
+            computeDescriptors(input_dir, output_dir, color_space, True, mask_dir)
+        else:
+            computeDescriptors(input_dir, output_dir, color_space)
+            
 
     
 

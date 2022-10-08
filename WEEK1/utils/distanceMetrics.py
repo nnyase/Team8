@@ -31,7 +31,11 @@ def L1_Distance(con,testCon):
 def X2_Distance(con,testCon):
     integral=0
     for i in range(len(con)):
-        x2= ((con[i]-testCon[i])**2)/(con[i]+testCon[i])
+        if con[i] + testCon[i] == 0:
+            x2 = 0
+        else:
+            x2= ((con[i]-testCon[i])**2)/(con[i]+testCon[i])
+            
         integral= integral + x2
     
     else:
@@ -44,11 +48,11 @@ def X2_Distance(con,testCon):
 def Hellinger_kernel(con,testCon):
     integral=0
     for i in range(len(con)):
-        HK= ((con[i]*testCon[i])**.5)
+        HK= (con[i]**.5-testCon[i]**.5)**2
         integral= integral + HK
     
     else:
-        HK_Result=integral
+        HK_Result=(integral**.5)/(2**.5)
     #    print("Hellinger Kernel distance")
     #    print(HK_Result)
     return HK_Result
@@ -59,11 +63,11 @@ def Hist_Intersection(con,testCon):
         HI += min(con[i], testCon[i])
         #print("Histogram Intersection")
         #print(HI)
-    return HI
+    return -HI
 
 # Cosine Similarity
 def Cosine_Similarity(con,testCon):
     cos_sim = dot(con, testCon)/(norm(con)*norm(testCon))
     #print("Cosine similarity")
     #print(cos_sim)
-    return cos_sim
+    return -cos_sim
