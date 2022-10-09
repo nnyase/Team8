@@ -71,11 +71,11 @@ def get_binary_mask3(myimage):
      
     #Take S (saturation) and remove any value that is less than 100
     s = myimage_hsv[:,:,1]
-    s = np.where(s < 100, 0, 1) # Any value below 127 will be excluded
+    s = np.where(s < 100, 0, 1) 
  
     # Take V (saturation) and remove any value that is more than 50
     v = myimage_hsv[:,:,2]
-    v = np.where(v > 50, 0, 1)  # Any value above 127 will be part of our mask
+    v = np.where(v > 50, 0, 1)
  
     # Combine our two masks based on S and V into a single "Foreground"
     foreground = np.where(s+v > 0, 1, 0).astype(np.uint8)  #Casting back into 8bit integer

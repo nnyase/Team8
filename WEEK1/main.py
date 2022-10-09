@@ -32,7 +32,7 @@ def parse_args():
 def mainProcess():
     # All available posibilities
     color_spaces = ["rgb","hsv","cielab", "cieluv", "ycbcr"]
-    distance_funcs = ["euclidean", "l1", "x2", "hellinger", "histIntersect", "cosSim"]
+    distance_funcs = ["euclidean", "l1", "x2", "hellinger", "cosSim"]
     background_funcs = ["method1", "method2", "method3"]
     
     
@@ -57,7 +57,7 @@ def mainProcess():
     if args.background_rem == "no":
         background_funcs = []
     elif args.background_rem != "all":
-        if args.background_rem in distance_funcs:
+        if args.background_rem in background_funcs:
             background_funcs = [args.background_rem]
         else:
             print("Not a valid background removal function!")
@@ -170,15 +170,15 @@ def mainProcess():
                 
                 if not os.path.exists(folderPath):
                     os.makedirs(folderPath)
-                    
                 
-                    # Compute result
-                    result = saveBestKmatches(pathBBDDdescriptors, pathQdescriptors, args.result_k, disFunc)
-                    
-                    # Store results
-                    store_in_pkl(folderPath, result)
-                    
-                    print("Retrieval done!")
+            
+                # Compute result
+                result = saveBestKmatches(pathBBDDdescriptors, pathQdescriptors, args.result_k, disFunc)
+                
+                # Store results
+                store_in_pkl(folderPath, result)
+                
+                print("Retrieval done!")
     else:
         
         
@@ -203,13 +203,13 @@ def mainProcess():
                         os.makedirs(folderPath)
                         
                     
-                        # Compute result
-                        result = saveBestKmatches(pathBBDDdescriptors, pathQdescriptors, args.result_k, disFunc)
-                        
-                        # Store results
-                        store_in_pkl(folderPath, result)
-                        
-                        print("Retrieval done!")
+                    # Compute result
+                    result = saveBestKmatches(pathBBDDdescriptors, pathQdescriptors, args.result_k, disFunc)
+                    
+                    # Store results
+                    store_in_pkl(folderPath, result)
+                    
+                    print("Retrieval done!")
     
     # Compute retrieval evaluation if there is GT result
     if args.gt_result != "None":

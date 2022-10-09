@@ -58,13 +58,13 @@ def Hellinger_distance(con,testCon):
     return HK_Result
 
 # Histogram Intersection
-def Hist_Intersection(con,testCon):
-    HI=0
-    for i in range(len(con)):
-        HI += min(con[i], testCon[i])
-        #print("Histogram Intersection")
-        #print(HI)
-    return -HI
+#def Hist_Intersection(con,testCon):
+#    HI=0
+#    for i in range(len(con)):
+#        HI += min(con[i], testCon[i])
+#        #print("Histogram Intersection")
+#        #print(HI)
+#    return -HI
 
 # Cosine Similarity
 def Cosine_Similarity(con,testCon):

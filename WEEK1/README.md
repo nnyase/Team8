@@ -24,7 +24,7 @@ Options:
   -rDir RESULTS_DIR, 		Path where retrieval results will be saved.
   
   -disF DISTANCE_FUNC, 		Distance function to use to compute similarities. 
-							Options are: "euclidean", "l1", "x2", "hellinger", "histIntersect", "cosSim" or "all".
+							Options are: "euclidean", "l1", "x2", "hellinger", "cosSim" or "all".
 							If "all" is selected every function will be used.
   
   

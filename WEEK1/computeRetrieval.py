@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt #importing matplotlib
 import os
-from utils.distanceMetrics import EuclidianDistance, L1_Distance, X2_Distance, Hellinger_distance, Hist_Intersection, Cosine_Similarity
+from utils.distanceMetrics import EuclidianDistance, L1_Distance, X2_Distance, Hellinger_distance, Cosine_Similarity
 
 
 
@@ -121,8 +121,6 @@ def saveBestKmatches(bbddDescriptorsPath, qDescriptorsPath, k, distanceFunc):
         distanceFunc = X2_Distance
     elif distanceFunc == "hellinger":
         distanceFunc = Hellinger_distance
-    elif distanceFunc == "histIntersect":
-        distanceFunc = Hist_Intersection
     elif distanceFunc == "cosSim":
         distanceFunc = Cosine_Similarity
         
