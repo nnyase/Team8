@@ -151,7 +151,7 @@ def saveBestKmatches(bbddDescriptorsPath, qDescriptorsPath, k, distanceFunc):
         sortedIndexes = np.argsort(distances)
         
         # Save results in the list
-        result[i][:] = sortedIndexes[:k]
+        result[i][:] = sortedIndexes[:k].tolist()
     
     return result
     

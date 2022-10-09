@@ -4,8 +4,15 @@ Image retrieval using 1D histograms. If images contain background, it has to be 
 
 ## Usage:
 
+
 `` main.py `` script can be used to process every task of week 1.
 If ``"all"`` type of arguments are given, results and generated files are going to be saved in different folders. 
+### Example
+
+Compute QSD2 with every distance function, every color space and every background removal method. Use 1,5 values of MAP@k evaluation.
+``
+main.py -bbddDir ../../WEEK1/BBDD/ -qDir ../../WEEK1/qsd2_w1/ -dDir ./descriptors/ -rDir ./results/ -disF all -rK 10 -c cielab -bRem method3 -maskDir ./masks/ -mapK <1,5> -gtR ../../WEEK1/qsd2_w1/gt_corresps.pkl -gtM ../../WEEK1/qsd2_w1/
+``
 
 ``
 $ main.py [-h] [-bbddDir BBDD_DIR] [-qDir QUERY_DIR][-dDir DESCRIPTOR_DIR] [-rDir RESULTS_DIR] [-disF DISTANCE_FUNC] [-rK RESULT_K] [-c COLOR_SPACE] [-bRem BACKGROUND_REM] [-maskDir MASK_DIR] [-mapK MAP_K_VALUES] [-gtR GT_RESULT] [-gtM GT_MASKS]
