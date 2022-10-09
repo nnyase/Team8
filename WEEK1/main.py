@@ -21,7 +21,7 @@ def parse_args():
     parser.add_argument('-bRem', '--background_rem', default = "no", type = str, help='Method to remove the background of images')
     parser.add_argument('-maskDir', '--mask_dir', default="None", type=str, help='Path where background mask will be saved')
     parser.add_argument('-mapK', '--map_k_values', default="<1,5>", type=str, help='Which values of k use to evaluate using MAP')
-    parser.add_argument('-gtR', '--gt_result',, type=str, help='Ground-truth result of query')
+    parser.add_argument('-gtR', '--gt_result', default = "None", type=str, help='Ground-truth result of query')
     parser.add_argument('-gtM', '--gt_masks', default="None", type = str, help="Path where ground-truth masks are")
     
 
@@ -85,22 +85,23 @@ def mainProcess():
         
         print("Masks generated!")
     
-    # Evaluate masks    
-    for i, maskFolder in enumerate(maskFolders):
-        
-        print(background_func[i], " generated mask evaluation: ")
-        
-        # Load files
-        act = dir_path(args.gt_masks)
-        pred = dir_path(maskFolder)
-        actual_imgs=load_images_from_folder(act)
-        predicted_imgs = load_images_from_folder(pred)
-        
-        # Calculate TP, FN, FP
-        TP, FN, FP = performance_accumulation_pixel(actual=actual_imgs, predicted=predicted_imgs)
-        
-        # Calculate Precision, Recall, F1
-        metrics(TP,FN,FP)
+    # Evaluate mask if there are GT 
+    if args.gt_masks != "None":
+        for i, maskFolder in enumerate(maskFolders):
+            
+            print(background_func[i], " generated mask evaluation: ")
+            
+            # Load files
+            act = dir_path(args.gt_masks)
+            pred = dir_path(maskFolder)
+            actual_imgs=load_images_from_folder(act)
+            predicted_imgs = load_images_from_folder(pred)
+            
+            # Calculate TP, FN, FP
+            TP, FN, FP = performance_accumulation_pixel(actual=actual_imgs, predicted=predicted_imgs)
+            
+            # Calculate Precision, Recall, F1
+            metrics(TP,FN,FP)
         
         
     
@@ -210,36 +211,17 @@ def mainProcess():
                         
                         print("Retrieval done!")
     
-    # Compute retrieval evaluation
-    
-    # Read GT 
-    gtResults = read_pkl(args.gt_result)
-    
-    if args.background_rem == "no":
-        for disFunc in distance_funcs:
-            for color_space in color_spaces:
-                
-                # Get result file path
-                pathResults = args.results_dir + queryName + "/" + color_space + "_" + disFunc + "/result.pkl"
-    
-                # Read prediction results
-                predictedResults = read_pkl(pathResults)
-            
-                for k in map_k_values:
-                    # Compute mapk evaluation
-                    mapkValue = mapk(gtResults, predictedResults, k)
-                    
-                    # Print results
-                    print("Color space: ", color_space, ", distance func: ", disFunc, ", MAP%", 
-                          k, " score is: ", mapkValue)
-    else:
+    # Compute retrieval evaluation if there is GT result
+    if args.gt_result != "None":
+        # Read GT 
+        gtResults = read_pkl(args.gt_result)
         
-        for background_func in background_funcs:
+        if args.background_rem == "no":
             for disFunc in distance_funcs:
                 for color_space in color_spaces:
                     
                     # Get result file path
-                    pathResults = args.results_dir + queryName + "/" + color_space + "_" + disFunc + "_" + background_func + "/result.pkl"
+                    pathResults = args.results_dir + queryName + "/" + color_space + "_" + disFunc + "/result.pkl"
         
                     # Read prediction results
                     predictedResults = read_pkl(pathResults)
@@ -249,8 +231,27 @@ def mainProcess():
                         mapkValue = mapk(gtResults, predictedResults, k)
                         
                         # Print results
-                        print("Background removal method: ", background_func, "Color space: ", color_space, ", distance func: ", 
-                              disFunc, ", MAP%", k, " score is: ", mapkValue)
+                        print("Color space: ", color_space, ", distance func: ", disFunc, ", MAP%", 
+                              k, " score is: ", mapkValue)
+        else:
+            
+            for background_func in background_funcs:
+                for disFunc in distance_funcs:
+                    for color_space in color_spaces:
+                        
+                        # Get result file path
+                        pathResults = args.results_dir + queryName + "/" + color_space + "_" + disFunc + "_" + background_func + "/result.pkl"
+            
+                        # Read prediction results
+                        predictedResults = read_pkl(pathResults)
+                    
+                        for k in map_k_values:
+                            # Compute mapk evaluation
+                            mapkValue = mapk(gtResults, predictedResults, k)
+                            
+                            # Print results
+                            print("Background removal method: ", background_func, "Color space: ", color_space, ", distance func: ", 
+                                  disFunc, ", MAP%", k, " score is: ", mapkValue)
 
 if __name__ == "__main__":
 

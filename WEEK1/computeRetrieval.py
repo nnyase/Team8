@@ -3,7 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt #importing matplotlib
 import os
 from utils.distanceMetrics import EuclidianDistance, L1_Distance, X2_Distance, Hellinger_distance, Hist_Intersection, Cosine_Similarity
-from utils.managePKLfiles import store_in_pkl
 
 
 
@@ -157,42 +156,6 @@ def saveBestKmatches(bbddDescriptorsPath, qDescriptorsPath, k, distanceFunc):
         result[i][:] = sortedIndexes[:k]
     
     return result
-
-
-
-if __name__ == "__main__":
-
-    # Set args
-    pathDescriptors = "./descriptors/"
-    nameQ = "qsd1_w1"
-    colorSpaces = ["rgb","hsv","cielab", "cieluv", "ycbcr"]
-    pathOutput = "./results/qsd1/"
-    k = 10
-    distanceFuncs = [EuclidianDistance, L1_Distance, X2_Distance, Hellinger_distance, 
-                     Hist_Intersection, Cosine_Similarity]
-    distanceFuncsStr = ["euclidean", "l1", "x2", "hellinger", "histIntersect", "cosSim"]
-    
-    
-    # Compute result for every descriptor color space
-    for colorSpace in colorSpaces:
-        
-        # Get descriptor folders
-        pathBBDDdescriptors = pathDescriptors + "descriptors_BBDD_" + colorSpace + "/"
-        pathQdescriptors = pathDescriptors + "descriptors_" + nameQ + "_" + colorSpace + "/"
-        
-        # Compute results using each distance function
-        for i, disFunc in enumerate(distanceFuncs):
-            
-            # Create folder 
-            resultsPath = pathOutput + colorSpace + "_" + distanceFuncsStr[i] + "/"
-            if not os.path.exists(resultsPath):
-                os.mkdir(resultsPath)
-            
-            # Compute result
-            result = saveBestKmatches(pathBBDDdescriptors, pathQdescriptors, k, disFunc)
-            
-            # Store results
-            store_in_pkl(resultsPath, result)
     
     
 

@@ -45,7 +45,8 @@ Options:
 						    Default value is <1,5>.
   
   -gtR GT_RESULT, 			Ground-truth result of query.
+							Default values is 'none'(no evaluating generated results).
   
   -gtM GT_MASKS, 			Path where ground-truth masks are.
-							Default value is 'none'.
+							Default value is 'none' (no evaluating generated masks).
  ```

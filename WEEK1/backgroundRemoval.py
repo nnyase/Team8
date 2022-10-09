@@ -1,7 +1,5 @@
 import cv2
 import numpy as np
-from matplotlib import pyplot as plt
-from PIL import Image as im
 import os
 
 # METHOD 1
@@ -21,6 +19,9 @@ def get_binary_mask(image):
     # where the histogram would only consist of two peaks, 
     # a good threshold would be in the middle of those two values
     ret,binary_mask = cv2.threshold(blur,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    
+    # Not operator
+    binary_mask = cv2.bitwise_not(binary_mask)
 
     # Convert 255 into 1 to have a binary mask
     #binary_mask[binary_mask == 255] = 1 
@@ -68,26 +69,79 @@ def get_binary_mask3(myimage):
     
     myimage_hsv = cv2.cvtColor(myimage, cv2.COLOR_BGR2HSV)
      
-    #Take S and remove any value that is less than half
+    #Take S (saturation) and remove any value that is less than 100
     s = myimage_hsv[:,:,1]
-    s = np.where(s < 127, 0, 1) # Any value below 127 will be excluded
+    s = np.where(s < 100, 0, 1) # Any value below 127 will be excluded
  
-    # We increase the brightness of the image and then mod by 255
-    v = (myimage_hsv[:,:,2] + 127) % 255
-    v = np.where(v > 127, 1, 0)  # Any value above 127 will be part of our mask
+    # Take V (saturation) and remove any value that is more than 50
+    v = myimage_hsv[:,:,2]
+    v = np.where(v > 50, 0, 1)  # Any value above 127 will be part of our mask
  
     # Combine our two masks based on S and V into a single "Foreground"
     foreground = np.where(s+v > 0, 1, 0).astype(np.uint8)  #Casting back into 8bit integer
  
     background = np.where(foreground==0,255,0).astype(np.uint8) # Invert foreground to get background in uint8
     background = cv2.cvtColor(background, cv2.COLOR_GRAY2BGR)  # Convert background back into BGR space
-    foreground=cv2.bitwise_and(myimage,myimage,mask=foreground) # Apply our foreground map to original image
+    foreground= cv2.bitwise_and(myimage,myimage,mask=foreground) # Apply our foreground map to original image
     finalimage = background+foreground # Combine foreground and background
     binary_mask = cv2.bitwise_not(background)
  
-    return binary_mask
+    # Post process the mask and return
+    return postProcessMask(binary_mask[:,:,0])
 
 
+# Giving a binary mask, it removes all not connected background areas with the most external
+# component
+def postProcessMask(binary_mask):
+    checked = np.zeros(binary_mask.shape, dtype = np.uint8)
+    background = np.zeros(binary_mask.shape, dtype = np.uint8) 
+    
+    queue = [(0,0)]
+    checked[0,0] = 255
+    background[0,0] = 255
+    
+    while len(queue) > 0:
+        i, j = queue.pop()
+        
+        if i + 1 < binary_mask.shape[0]:
+                
+                if checked[i+1,j] == 0:
+                    checked[i+1,j] = 255
+                    if binary_mask[i+1,j] == 0:
+                        background[i + 1, j] = 255
+                    
+                        queue.append((i+1,j))
+                    
+        if i - 1 > 0:
+            if checked[i-1,j] == 0:
+                checked[i-1,j] = 255
+                if binary_mask[i-1,j] == 0:
+                    background[i - 1, j] = 255
+                
+                    queue.append((i-1,j))
+        
+        if j + 1 < binary_mask.shape[1]:
+                
+                if checked[i,j+1] == 0:
+                    checked[i,j+1] = 255
+                    if binary_mask[i,j+1] == 0:
+                        background[i, j+1] = 255
+                    
+                        queue.append((i,j+1))
+                    
+        if j - 1 > 0:
+            if checked[i,j-1] == 0:
+                checked[i,j-1] = 255
+                if binary_mask[i,j-1] == 0:
+                    background[i, j-1] = 255
+                
+                    queue.append((i,j-1))
+        
+    bg = 255- background
+    return bg
+                
+        
+                
 def generateBackgroundMasks(imagesPath, masksPath, method):
     """ This functions creates the masks of the background of images and stores them in the output folder.
     

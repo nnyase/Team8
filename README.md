@@ -1,7 +1,11 @@
+﻿
+# TEAM 8 
+## M1 - INTRODUCTION TO HUMAN AND COMPUTER VISION
 
-## WEEK 1 CODE
+### Team members
 
-Requiered packages:
- - Numpy
- - OpenCV
- - Matplotlib
+ - Pierre Lammers
+ - Michell Vargas
+ - Ndivhuwo Nyase
+ - Iñigo Auzmendi
+

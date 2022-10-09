@@ -56,6 +56,7 @@ def Hellinger_distance(con,testCon):
     #    print("Hellinger Kernel distance")
     #    print(HK_Result)
     return HK_Result
+
 # Histogram Intersection
 def Hist_Intersection(con,testCon):
     HI=0

@@ -2,8 +2,6 @@ import cv2
 import numpy as np
 import os
 from utils.changeColorSpace import changeBGRtoHSV, changeBGRtoYCBCR, changeBGRtoCIELAB, changeBGRtoCIELUV
-import argparse
-
 
 def genHistoNoBackground(image, backgroundMask):
     """ This function generates the histogram of a one channel image, not
@@ -158,48 +156,6 @@ def computeDescriptors(imagesPath, outputPath, colorSpace, background = False,
             descriptors[file] = descriptor
     
     return descriptors
-
-
-def parse_args():
-    parser = argparse.ArgumentParser(description= 'Descriptor generation')
-    parser.add_argument('-iDir', '--input_dir', type=str, help='Path of images')
-    parser.add_argument('-oDir', '--output_dir', type=str, help='Path were descriptors will be saved')
-    parser.add_argument('-c', '--color_space', type=str, help='Color space that will be used')
-    parser.add_argument('-maskDir', '--mask_dir', default= 'None', type=str, help='Background mask path if the background has been removedS')
-
-    return parser.parse_args()
-
-
-if __name__ == "__main__":
-
-    #input_dir = "../../WEEK1/BBDD/"
-    #output_dir = "./descriptors/"
-    #mask_dir = 'None'
-    
-    
-    color_spaces = ["rgb","hsv","cielab", "cieluv", "ycbcr"]
-    
-    
-    
-    # Get args
-    args = parse_args()
-    
-    if args.color_space == "all":
-        # Use every color space available
-        for color_space in color_spaces:
-        
-            if args.mask_dir != 'None':
-                computeDescriptors(args.input_dir, args.output_dir, color_space, True, args.mask_dir)
-            else:
-                computeDescriptors(args.input_dir, args.output_dir, color_space)
-    else:
-        
-        if args.mask_dir != 'None':
-            computeDescriptors(args.input_dir, args.output_dir, args.color_space, True, args.mask_dir)
-        else:
-            computeDescriptors(args.input_dir, args.output_dir, args.color_space)
-        
-            
 
     
 
