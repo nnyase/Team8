@@ -11,7 +11,7 @@ If ``"all"`` type of arguments are given, results and generated files are going 
 
 Compute QSD2 with every distance function, every color space and every background removal method. Use 1,5 values of MAP@k evaluation.
 ``
-main.py -bbddDir ../../WEEK1/BBDD/ -qDir ../../WEEK1/qsd2_w1/ -dDir ./descriptors/ -rDir ./results/ -disF all -rK 10 -c cielab -bRem method3 -maskDir ./masks/ -mapK <1,5> -gtR ../../WEEK1/qsd2_w1/gt_corresps.pkl -gtM ../../WEEK1/qsd2_w1/
+main.py -bbddDir ../../WEEK1/BBDD/ -qDir ../../WEEK1/qsd2_w1/ -dDir ./descriptors/ -rDir ./results/ -disF all -rK 10 -c all -bRem all -maskDir ./masks/ -mapK <1,5> -gtR ../../WEEK1/qsd2_w1/gt_corresps.pkl -gtM ../../WEEK1/qsd2_w1/
 ``
 
 ``
