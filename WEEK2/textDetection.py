@@ -7,8 +7,7 @@ def detectText(image, multiplePaintings = False):
     imageGray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     imageS = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)[:,:,1]<20
     
-    
-    
+
     kernel = np.ones((3,3))
     dilateImage = cv2.dilate(imageGray, kernel, 1)
     erodeImage = cv2.erode(imageGray, kernel, 1)

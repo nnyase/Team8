@@ -82,5 +82,37 @@ def print3DHistogram(histogram):
 
                 print("[" + str(x) + "," + str(y) + "," + str(z) + "] = " +  str(histogram[x,y,z]) + "\n")
 
-    
+
+#Compute distance
+
+#EuclidianDistance
+def EuclidianDistance(hist1,hist2):
+    """
+    -> Return the Euclidian distance between two 3D histogram
+    """
+    return (np.sum((hist1 - hist2)**2))**0.5
+
+#L1 distance
+def L1_Distance(hist1,hist2):
+    """
+    -> Return the L1 distance between two 3D histogram
+    """
+    return (np.sum(abs(hist1 - hist2)))
+
+#X2 distance
+def X2_Distance(hist1,hist2):
+    """
+    -> Return the X2 distance between two 3D histogram
+    """
+    return np.sum(np.divide((hist1 - hist2)**2, hist1 + hist2))
+
+#Hellinger kernel 
+def Hellinger_distance(hist1,hist2):
+    """
+    -> Return the Hellinger distance between two 3D histogram
+    """
+    return np.sum((np.multiply(hist1,hist2))**2)
+ 
+
+
 
