@@ -8,4 +8,3 @@
  - Michell Vargas
  - Ndivhuwo Nyase
  - Iñigo Auzmendi
-
