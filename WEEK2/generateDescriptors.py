@@ -2,14 +2,14 @@ import cv2
 import numpy as np
 import os
 from utils.changeColorSpace import changeBGRtoHSV, changeBGRtoYCBCR, changeBGRtoCIELAB, changeBGRtoCIELUV
-from multiDimensionalDescriptors import generateMultiDimDescriptors
+from multiResDescriptors import generateMultiResDescriptors
 from hist2Doptimized import Create2DHistogram
 from hist3Doptimized import Create3DHistogram
 
 
 
 def computeDescriptors(imagesPath, outputPath, colorSpace, numBins, histGenFunc, levels,
-                       mask):
+                       backgroundMaskDir = None, textBox = None):
     """ This function computes the descriptors of the images from the input path 
     and save them in the output path.
     
@@ -29,8 +29,11 @@ def computeDescriptors(imagesPath, outputPath, colorSpace, numBins, histGenFunc,
         The function to generate the descriptors
     levels: int
         The number of multidimensional levels
-    mask : numpy array (np.uint8)
-        Binary mask to know which pixel has to be used in the process.
+    backgroundMaskDir : str
+        Path where binary mask to know which pixel is related to the background are.
+        Default: None  -> No background
+    textBox: numpy array (np.int)
+        List of the text box coordinates
 
     Returns
     -------
@@ -47,6 +50,12 @@ def computeDescriptors(imagesPath, outputPath, colorSpace, numBins, histGenFunc,
         if file[-4:] == ".jpg":
             
             image = cv2.imread(imagesPath + file)
+            
+            if backgroundMaskDir is None:
+                # Take into account every pixel
+                mask = np.zeros(image.shape[:2], dtype = np.uint8) + 255
+            else:
+                mask = cv2.imread(backgroundMaskDir + file[:-4] + ".png", cv2.IMREAD_GRAYSCALE)
 
             # Convert the image into the new color space
             if colorSpace == "hsv":
@@ -58,28 +67,9 @@ def computeDescriptors(imagesPath, outputPath, colorSpace, numBins, histGenFunc,
             elif colorSpace == "ycbcr":
                 image = changeBGRtoYCBCR(image)
             
-            descriptor = generateMultiDimDescriptors(image, mask, levels, histGenFunc, numBins)
+            descriptor = generateMultiResDescriptors(image, mask, levels, histGenFunc, numBins)
             
             descriptorPath = outputPath + file[:-4] + ".npy"
             np.save(descriptorPath, descriptor)
             
     
-descriptor_dir = "./descriptors/"
-color_spaces = ["cielab"]
-levels = [0, 1, 2, 3]
-bins2D = [10, 45, 90, 130, 180]
-bins3D = [5, 10, 20, 30, 40]
-    
-# Generate the descriptors of BBDD if they are not already generated
-for color_space in color_spaces:
-    
-    # Create folder
-    folderName = color_space + "/"
-    folderPath = args.descriptor_dir + "BBDD" + "/" + folderName
-    
-    if not os.path.exists(folderPath):
-        os.makedirs(folderPath)
-        
-        computeDescriptors(args.BBDD_dir, folderPath, color_space)
-        
-        print("BBDD descriptors generated!")

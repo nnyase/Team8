@@ -1,6 +1,6 @@
 import numpy as np
 
-def Create3DHistogram(image, bins, colorSpaceSize, mask):
+def Create3DHistogram(image, bins, mask):
     """
     -> Create the 3D histogram of an image
 
@@ -8,7 +8,6 @@ def Create3DHistogram(image, bins, colorSpaceSize, mask):
 
     - image (np array) : image => e.g. cv2.imread('path_to_image', cv2.COLOR_BGR2RGB) 
     - bins (int) : number of bins
-    - colorSpaceSize (vector) : vector with the size of each channel => (255,255,255) for RGB
     - mask (np array) : binary mask
 
     Return :
@@ -19,24 +18,24 @@ def Create3DHistogram(image, bins, colorSpaceSize, mask):
     newImage = image.copy()
     
     # Set 0,0,0 to mask pixels
-    newImage[mask == 255] = [0,0,0]
-    numBackgroundPixels = np.sum(mask == 255)
+    newImage[mask == 0] = [0,0,0]
+    numBackgroundPixels = np.sum(mask == 0)
     
     # Get channels
-    channel1 = image[:, :, 0].reshape(-1)
-    channel2 = image[:, :, 1].reshape(-1)
-    channel3 = image[:, :, 2].reshape(-1)
+    channel1 = newImage[:, :, 0].reshape(-1)
+    channel2 = newImage[:, :, 1].reshape(-1)
+    channel3 = newImage[:, :, 2].reshape(-1)
     
     
     # Compute histogram
-    hist, _ = np.histogramdd((channel1, channel2, channel3), bins = bins, range = [(0, colorSpaceSize[0]), (0,colorSpaceSize[1]), (0,colorSpaceSize[2])])
+    hist, _ = np.histogramdd((channel1, channel2, channel3), bins = bins, range = [(0, 255), (0,255), (0,255)])
     
     # Remove the values of the mask pixels
     hist[0,0,0] -= numBackgroundPixels
     
     # Every pixels is in mask
     if np.sum(hist) == 0:
-        hist[:,:,:] = [1,1,1]
+        hist[:,:,:] = 1
         
     # Normalize
     hist /= np.sum(hist)    

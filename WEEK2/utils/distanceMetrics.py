@@ -1,61 +1,35 @@
 from numpy.linalg import norm
 from numpy import dot
+import numpy as np
 
 #EuclidianDistance
-def EuclidianDistance(con,testCon):
-    integral=0
-    for i in range(len(con)):
-        EuclidianDistance= ((con[i]-testCon[i])**2)
-        integral= integral + EuclidianDistance
-    else:
-        ED_Result=integral**.5
-    #    print("Euclidian distance")
-    #    print(ED_Result)
-    return ED_Result
-  
-  
+def EuclidianDistance(hist1,hist2):
+    """
+    -> Return the Euclidian distance between two  histogram
+    """
+    return (np.sum((hist1 - hist2)**2))**0.5
+
 #L1 distance
-def L1_Distance(con,testCon):
-    integral=0
-    for i in range(len(con)):
-        L1= abs(con[i]-testCon[i])
-        integral= integral + L1
-    
-    else:
-        L1_Result=integral
-    #    print("L1 distance")
-    #    print(L1_Result)
-    return L1_Result
-    
+def L1_Distance(hist1,hist2):
+    """
+    -> Return the L1 distance between two  histogram
+    """
+    return (np.sum(abs(hist1 - hist2)))
+
 #X2 distance
-def X2_Distance(con,testCon):
-    integral=0
-    for i in range(len(con)):
-        if con[i] + testCon[i] == 0:
-            x2 = 0
-        else:
-            x2= ((con[i]-testCon[i])**2)/(con[i]+testCon[i])
-            
-        integral= integral + x2
-    
-    else:
-        x2_Result=integral
-    #    print("x2 distance")
-    #    print(x2_Result)
-    return x2_Result
-  
+def X2_Distance(hist1,hist2):
+    """
+    -> Return the X2 distance between two  histogram
+    """
+    return np.sum(np.divide((hist1 - hist2)**2, hist1 + hist2, out=np.zeros_like(hist1), where= (hist1 + hist2) !=0))
+
 #Hellinger kernel 
-def Hellinger_distance(con,testCon):
-    integral=0
-    for i in range(len(con)):
-        HK= (con[i]**.5-testCon[i]**.5)**2
-        integral= integral + HK
-    
-    else:
-        HK_Result=(integral**.5)/(2**.5)
-    #    print("Hellinger Kernel distance")
-    #    print(HK_Result)
-    return HK_Result
+def Hellinger_distance(hist1,hist2):
+    """
+    -> Return the Hellinger distance between two  histogram
+    """
+    return np.sqrt(np.sum((np.sqrt(hist1) - np.sqrt(hist2))**2))/(np.sqrt(2))
+  
 
 # Histogram Intersection
 #def Hist_Intersection(con,testCon):
