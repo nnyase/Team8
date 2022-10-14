@@ -8,6 +8,7 @@ import cv2
     Parameters
     ----------
     img : mat 
+    activateDrawContours: if true draws the contourns 
 
 
     Returns
