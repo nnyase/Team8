@@ -34,6 +34,10 @@ def Create3DHistogram(image, bins, colorSpaceSize, mask):
     # Remove the values of the mask pixels
     hist[0,0,0] -= numBackgroundPixels
     
+    # Every pixels is in mask
+    if np.sum(hist) == 0:
+        hist[:,:,:] = [1,1,1]
+        
     # Normalize
     hist /= np.sum(hist)    
     

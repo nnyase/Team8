@@ -61,6 +61,10 @@ def Create2DHistogram(image, bins, colorSpaceSize, mask):
     # Concatenate
     resultHist = np.concatenate([flatHist1, flatHist2, flatHist3])
     
+    # Every pixels is in mask
+    if np.sum(resultHist) == 0:
+        resultHist[:] = 1
+    
     # Normalize
     resultHist /= np.sum(resultHist)
     

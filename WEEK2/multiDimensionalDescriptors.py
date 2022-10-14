@@ -1,6 +1,6 @@
 import numpy as np
 
-def multiDimensionalDescriptors(image, mask, levels, histGenFunc, bins):
+def generateMultiDimDescriptors(image, mask, levels, histGenFunc, bins):
     """
     This function generates the multidimensional descriptors computing the Spatial Pyramin Matching.
 
