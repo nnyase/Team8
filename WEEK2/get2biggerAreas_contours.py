@@ -12,8 +12,8 @@ import cv2
 
     Returns
     -------
-    Results : vector with 8 values which are the location of the maxs an mins 
-    of each contourn in the order  minX , maxX ,  maxY ,  minY  
+    Results : vector with  4 tuples  which are the location of the maxs an mins 
+    of each contourn in the order  [minX , maxX ]  [maxY ,  minY]  
 
 
     """
