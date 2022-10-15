@@ -3,6 +3,7 @@ import numpy as np
 import os
 from matplotlib import pyplot as plt
 from utils.managePKLfiles import store_in_pkl
+from get2biggerAreas_contours import getBiggestContours
 
 def detectText(image):
     """ This functions returns the BBox of the text box in the input image given.
@@ -299,7 +300,7 @@ def detectTextBoxes(inputPath, outputPath, multiplePaintings = "No", maskDir = N
                 # Read mask
                 mask = cv2.imread(maskDir + file[:-4] + ".png", cv2.IMREAD_GRAYSCALE)
                 # Get multiple paintings boxes
-                boxes = getPaintings(image, mask)
+                boxes = getBiggestContours(mask)
                 
                 paintings = []
                 # Get cropped painting images
@@ -313,13 +314,13 @@ def detectTextBoxes(inputPath, outputPath, multiplePaintings = "No", maskDir = N
             # For each painting detect text box
             for i, painting in enumerate(paintings):
                 
-                detection = detectText(image)
+                detection = detectText(painting)
                 
                 # If the paintings are cropped, get real positions
                 if multiplePaintings == "yes":
                     xMin, yMin, _, _ = boxes[i] 
                     
-                    for j in len(detection):
+                    for j in range(len(detection)):
                         detection[j][0] += xMin
                         detection[j][1] += yMin
                 

@@ -90,8 +90,21 @@ def mapkL(actual, predicted, k=10):
     """
     result = 0
     num = 0
-    for a,p in zip(actual, predicted):
-        for a_value, p_list in zip(a, p):
+    for a, p in zip(actual, predicted):
+        if len(a)>len(p):
+            
+            numPaintings = len(p)
+            num += len(a) - len(p)
+            
+        elif len(p)>len(a):
+            
+            numPaintings = len(a)
+            
+        else:
+            
+            numPaintings = len(a)
+            
+        for a_value, p_list in zip(a[:numPaintings], p[:numPaintings]):
             result += apk([a_value], p_list, k)
             num += 1
         

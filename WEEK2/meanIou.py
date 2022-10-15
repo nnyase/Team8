@@ -63,17 +63,19 @@ def meanIoU(boxes1, boxes2):
     """
 
     sumIoU = 0
-    
+    numBoxes = 0
     # Sum every boxes iou
     for i in range(len(boxes1)):
-        for j in range(len(boxes1[i])):
+        numBoxes += max(len(boxes1[i]), len(boxes2[i]))
+        
+        for j in range(min(len(boxes1[i]), len(boxes2[i]))):
             box1 = [boxes1[i][j][0][0], boxes1[i][j][0][1], boxes1[i][j][2][0], boxes1[i][j][2][1]]
             box2 = [boxes2[i][j][0][0], boxes2[i][j][0][1], boxes2[i][j][2][0], boxes2[i][j][2][1]]
         
             sumIoU += iou(box1, box2)
     
     # Return mean
-    return sumIoU / len(boxes1)
+    return sumIoU / numBoxes
         
 
 def evaluateTextBoxes(resultFile, predictedFile):

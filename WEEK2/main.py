@@ -12,6 +12,7 @@ from textDetection import detectTextBoxes
 from meanIou import evaluateTextBoxes
 
 
+
 def parse_args():
     parser = argparse.ArgumentParser(description= 'Descriptor generation')
     parser.add_argument('-bbddDir', '--BBDD_dir', type=str, help='Path of bbdd images')
@@ -72,7 +73,7 @@ def evaluateBackgroundMasks(gt_masks, maskFolder, background_func):
     metrics(TP,FN,FP)
     
 def genAndStoreDescriptors(color_spaces, hist_types, bins_2d, bins_3d, levels, descriptor_dir, images_dir, database_name, 
-                           maskFolder = None, background_func = None, textBoxes = None):
+                           maskFolder = None, background_func = None, textBoxes = None, multiple_paintings = "no"):
                         
     for color_space in color_spaces:
         
@@ -101,7 +102,8 @@ def genAndStoreDescriptors(color_spaces, hist_types, bins_2d, bins_3d, levels, d
                         os.makedirs(folderPath)
                         
                         computeDescriptors(images_dir, folderPath, color_space, num, histGenFunc, level, 
-                                           backgroundMaskDir = maskFolder, textBoxes = textBoxes)
+                                           backgroundMaskDir = maskFolder, textBoxes = textBoxes, 
+                                           multipleImages= multiple_paintings)
                         
                         print(database_name, " descriptors generated!")
                 
@@ -166,7 +168,7 @@ def mainProcess():
             
     # Generate textBoxes
     if args.text_boxes == "yes":
-        textBoxes = detectTextBoxes(args.query_dir, args.text_boxes_dir, args.multiple_paintings, args.mask_dir)
+        textBoxes = detectTextBoxes(args.query_dir, args.text_boxes_dir, args.multiple_paintings, maskFolder)
     else:
         textBoxes = None
         
@@ -181,7 +183,8 @@ def mainProcess():
     
     # Generate the descriptors of query if they are not generated
     genAndStoreDescriptors(color_spaces, hist_types, bins_2d, bins_3d, levels, args.descriptor_dir, 
-                           args.query_dir, queryName, maskFolder, background_func, textBoxes)
+                           args.query_dir, queryName, maskFolder, background_func, textBoxes, 
+                           args.multiple_paintings)
     
     
     
@@ -200,7 +203,7 @@ def mainProcess():
         
                     # Get descriptor folders
                     pathDifferentHist = "level_" + str(level) + "/" + hist_type + "_bins_" + str(num) + "/"
-                    pathBBDDdescriptors = args.descriptor_dir + "/BBDD/" + color_space + "/" + pathDifferentHist
+                    pathBBDDdescriptors = args.descriptor_dir + "BBDD/" + color_space + "/" + pathDifferentHist
                     if args.background_rem == "no":
                         pathQdescriptors = args.descriptor_dir + queryName + "/" + color_space + "/" + pathDifferentHist
                     else:

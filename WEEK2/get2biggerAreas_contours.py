@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 
 """
     get2Biggercontourns
@@ -27,31 +28,39 @@ def get_contour_areas(contours):
         all_areas.append(area)
 
     return all_areas
-def contournLocation(cntrn):
-    minX = tuple(cntrn[cntrn[:,:,0].argmin()][0])
-    maxX = tuple(cntrn[cntrn[:,:,0].argmax()][0])
-    maxY = tuple(cntrn[cntrn[:,:,1].argmin()][0])
-    minY = tuple(cntrn[cntrn[:,:,1].argmax()][0])
-    X=[minX,maxX]
-    Y=[minY,maxY]
+def contourLocation(cntrn):
+    minX = np.min(cntrn[:,:,0])
+    maxX = np.max(cntrn[:,:,0])
+    minY = np.min(cntrn[:,:,1])
+    maxY = np.max(cntrn[:,:,1])
   
-    return X,Y
+    return (minX, minY, maxX, maxY)
     
-def get2Biggercontourns(img,activateDrawContours):
-    gray= cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-    edges= cv2.Canny(gray, 50,200)
-    contours, hierarchy= cv2.findContours(edges.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+def getBiggestContours(img):
+    #gray= cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+    #edges= cv2.Canny(gray, 50,200)
+    contours, hierarchy= cv2.findContours(img.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     sorted_contours= sorted(contours, key=cv2.contourArea, reverse= True)
+    
+    foundContours = list()
+    
+    minArea = img.shape[0]/10 * img.shape[1]/10
+    for contour in sorted_contours:
+        area = cv2.contourArea(contour)
+        if area > minArea:
+            foundContours.append(contourLocation(contour))
+            # 2 Max contours
+            if len(foundContours) > 1:
+                break
+        else:
+            break
 
-    first= sorted_contours[0]
-    second= sorted_contours[1]
-    first_Locations= contournLocation(first)
-    second_Locations= contournLocation(second)
-    results= [first_Locations,second_Locations]
-    if activateDrawContours:
-        cv2.drawContours(img, first, -1, (0,255,0),10)
-        cv2.drawContours(img, second, -1, (0,255,0),10)
-    return results
+    if len(foundContours)>1:
+        if foundContours[0][0] > foundContours[1][0]:
+            
+            foundContours[0], foundContours[1] = foundContours[1], foundContours[0]
+    
+    return foundContours
     
 
     
