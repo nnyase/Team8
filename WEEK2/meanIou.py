@@ -28,8 +28,8 @@ def iou(box1, box2):
     # Compute the area of intersection rectangle
     interArea = max(0, x2 - x1 + 1) * max(0, y2 - y1 + 1)
     
-    print("X ratio: ", (box1[2] - box1[0] + 1) / (box2[2] - box2[0] + 1))
-    print("Y ratio: ", (box1[3] - box1[1] + 1) / (box2[3] - box2[1] + 1))
+    #print("X ratio: ", (box1[2] - box1[0] + 1) / (box2[2] - box2[0] + 1))
+    #print("Y ratio: ", (box1[3] - box1[1] + 1) / (box2[3] - box2[1] + 1))
     
     # compute the area of both the prediction and ground-truth
     # rectangles
@@ -76,17 +76,13 @@ def meanIoU(boxes1, boxes2):
     return sumIoU / len(boxes1)
         
 
-def computeDiff(resultFile, predictedFile):
+def evaluateTextBoxes(resultFile, predictedFile):
     result = read_pkl(resultFile)
     predicted = read_pkl(predictedFile)
     
     
     mIou = meanIoU(result, predicted)
     
-    print(mIou)
+    print("mIoU: ", mIou)
     
-resultPath = "../../WEEK2/qsd1_w2/text_boxes.pkl"
-predictedPath = "./textBoxes/text_boxes.pkl"
-
-computeDiff(resultPath, predictedPath)
     

@@ -8,8 +8,8 @@ from hist3Doptimized import Create3DHistogram
 
 
 
-def computeDescriptors(imagesPath, outputPath, colorSpace, numBins, histGenFunc, levels,
-                       backgroundMaskDir = None, textBox = None):
+def computeDescriptors(imagesPath, outputPath, colorSpace, numBins, histGenFunc, levels, textBoxes = None,
+                       backgroundMaskDir = None, multipleImages = None):
     """ This function computes the descriptors of the images from the input path 
     and save them in the output path.
     
@@ -48,7 +48,7 @@ def computeDescriptors(imagesPath, outputPath, colorSpace, numBins, histGenFunc,
     for file in files:
         # Check if it is an image
         if file[-4:] == ".jpg":
-            
+            imageNum = int(file[:-4].split("_")[-1])
             image = cv2.imread(imagesPath + file)
             
             if backgroundMaskDir is None:
@@ -67,9 +67,38 @@ def computeDescriptors(imagesPath, outputPath, colorSpace, numBins, histGenFunc,
             elif colorSpace == "ycbcr":
                 image = changeBGRtoYCBCR(image)
             
-            descriptor = generateMultiResDescriptors(image, mask, levels, histGenFunc, numBins)
+            if not(multipleImages is None):
+                boxes = getPaintings(image, mask)
+                masks = []
+                
+                emptyMask = np.zeros(image.shape[:2], dtype = np.uint8) + 255
+                for box in boxes:
+                    xMin, yMin, xMax, yMax = box
+                    
+                    newMask = emptyMask.copy()
+                    newMask[yMin:yMax + 1, xMin:xMax + 1] = 0
+                    masks.append(newMask)
+                    
             
-            descriptorPath = outputPath + file[:-4] + ".npy"
-            np.save(descriptorPath, descriptor)
-            
-    
+            else:
+                masks = [mask]
+                
+            for i, mask in enumerate(masks):
+                
+                if not(textBoxes is None):
+                    # Add text box pixels to the mask
+                    box = textBoxes[imageNum][i]
+                    
+                    xMin = box[0][0]
+                    yMin = box[0][1]
+                    
+                    xMax = box[2][0]
+                    yMax = box[2][1]
+                    
+                    mask[yMin:yMax + 1, xMin:xMax + 1] = 0
+                    
+                    
+                descriptor = generateMultiResDescriptors(image, mask, levels, histGenFunc, numBins)
+                
+                descriptorPath = outputPath + file[:-4] + "_" + str(i) + ".npy"
+                np.save(descriptorPath, descriptor)

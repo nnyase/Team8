@@ -261,17 +261,76 @@ def postProcessMask(image, i, j):
 
     return background
 """
-def detectTextBoxes(inputPath, outputPath):
+def detectTextBoxes(inputPath, outputPath, multiplePaintings = "No", maskDir = None):
+    """ This function detects the text boxes of the images that are in the input path.
+    
+
+    Parameters
+    ----------
+    inputPath : str
+        Images path.
+    outputPath : str
+        Path to save the box detections.
+    multiplePaintings : str, optional
+        Indication if the images can have more than one painting ("yes" or "no"). The default is "no".
+    maskDir : str, optional
+        Background mask path. If the image has multiple painting, indicate here the background masks path. The default is None.
+
+    Returns
+    -------
+    results : numpy array (int)
+        detected text boxes.
+
+    """
+    # Init box list
     results = []
+    
+    # Iterate files
     for file in os.listdir(inputPath):
         if file[-4:] == ".jpg":
             
+            # Init image box list
+            resultsImage = []
+            # Read image
             image = cv2.imread(inputPath + file)
-            detection = detectText(image)
-            results.append([detection])
-    
-    store_in_pkl(outputPath + "text_boxes.pkl", results)
             
+            # Check if there are more than one painting
+            if multiplePaintings == "yes":
+                # Read mask
+                mask = cv2.imread(maskDir + file[:-4] + ".png", cv2.IMREAD_GRAYSCALE)
+                # Get multiple paintings boxes
+                boxes = getPaintings(image, mask)
+                
+                paintings = []
+                # Get cropped painting images
+                for box in boxes:
+                    xMin, yMin, xMax, yMax = box
+                    paintings.append(image[yMin:yMax + 1, xMin:xMax + 1])
+            
+            else:
+                paintings = [image]
+            
+            # For each painting detect text box
+            for i, painting in enumerate(paintings):
+                
+                detection = detectText(image)
+                
+                # If the paintings are cropped, get real positions
+                if multiplePaintings == "yes":
+                    xMin, yMin, _, _ = boxes[i] 
+                    
+                    for j in len(detection):
+                        detection[j][0] += xMin
+                        detection[j][1] += yMin
+                
+                resultsImage.append(detection)
+                
+            results.append(resultsImage)
+    
+    # Store result
+    store_in_pkl(outputPath + "text_boxes.pkl", results)
+    
+    return results
     
             
 

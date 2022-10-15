@@ -98,6 +98,84 @@ def saveBestKmatches(bbddDescriptorsPath, qDescriptorsPath, k, distanceFunc):
 
     Returns
     -------
+    result : list of lists of lists (int)
+        The best k matches for each image in the query. The k matches are sorted from
+        the most similar to the least one.
+
+    """
+    
+    # Compute number of images in each set
+    numBBDD = len(os.listdir(bbddDescriptorsPath))
+    numQ = len(os.listdir(qDescriptorsPath))
+    
+    
+    # Get distance function
+    if distanceFunc == "euclidean":
+        distanceFunc = EuclidianDistance
+    elif distanceFunc == "l1":
+        distanceFunc = L1_Distance
+    elif distanceFunc == "x2":
+        distanceFunc = X2_Distance
+    elif distanceFunc == "hellinger":
+        distanceFunc = Hellinger_distance
+    elif distanceFunc == "cosSim":
+        distanceFunc = Cosine_Similarity
+        
+    # Init result list
+    result = []
+    
+    # For every image in query
+    for i, fileQ in enumerate(os.listdir(qDescriptorsPath)):
+        
+        # Get descriptor path
+        descriptors_Q1_Path = qDescriptorsPath + fileQ
+        
+        # Create list of distances
+        distances = np.array([-1.]*numBBDD)
+        
+        # For every image in BBDD
+        for j, fileBBDD in enumerate(os.listdir(bbddDescriptorsPath)):
+            
+            # Get descriptor path
+            descriptors_DDBB_Path = bbddDescriptorsPath + fileBBDD
+            
+            # Calculate distance
+            distance = SimilarityFromDescriptors(descriptors_Q1_Path,
+                                                 descriptors_DDBB_Path,False, distanceFunc)
+            
+            # Save distance
+            distances[j] = distance
+
+        # Sort the distances and get k smallest values indexes
+        sortedIndexes = np.argsort(distances)
+        
+        # Save results in the list
+        if int(fileQ[:-4].split("_")[-1]) == 0:
+            result.append([sortedIndexes[:k].tolist()])
+        else:
+            result[-1].append(sortedIndexes[:k].tolist())
+    
+    return result
+    
+
+def saveBestKmatchesOld(bbddDescriptorsPath, qDescriptorsPath, k, distanceFunc):
+    """ This function computes all the similarities between the database and query images
+        using the distance function given and returns k best matches for every query image
+    
+
+    Parameters
+    ----------
+    bbddDescriptorsPath : string
+        Path of the folder where .npy descriptor files of the database are stored.
+    qDescriptorsPath : string
+        Path of the folder where .npy descriptor files of the query images are stored..
+    k : int
+        Quantity of best matches is returned.
+    distanceFunc : function
+        Distance function that will be used to compute the similarities.
+
+    Returns
+    -------
     result : list of lists (int)
         The best k matches for each image in the query. The k matches are sorted from
         the most similar to the least one.
@@ -126,19 +204,19 @@ def saveBestKmatches(bbddDescriptorsPath, qDescriptorsPath, k, distanceFunc):
         
     
     # For every image in query
-    for i in range(numQ):
+    for i, fileQ in enumerate(os.listdir(qDescriptorsPath)):
         
         # Get descriptor path
-        descriptors_Q1_Path = qDescriptorsPath + PathBuilder(i)
+        descriptors_Q1_Path = qDescriptorsPath + fileQ
         
         # Create list of distances
         distances = np.array([-1.]*numBBDD)
         
         # For every image in BBDD
-        for j in range(numBBDD):
+        for j, fileBBDD in enumerate(os.listdir(bbddDescriptorsPath)):
             
             # Get descriptor path
-            descriptors_DDBB_Path = bbddDescriptorsPath + "bbdd_" + PathBuilder(j)
+            descriptors_DDBB_Path = bbddDescriptorsPath + fileBBDD
             
             # Calculate distance
             distance = SimilarityFromDescriptors(descriptors_Q1_Path,
@@ -154,8 +232,6 @@ def saveBestKmatches(bbddDescriptorsPath, qDescriptorsPath, k, distanceFunc):
         result[i][:] = sortedIndexes[:k].tolist()
     
     return result
-    
-    
 
 
 
