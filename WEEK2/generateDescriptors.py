@@ -3,7 +3,7 @@ import numpy as np
 import os
 from utils.changeColorSpace import changeBGRtoHSV, changeBGRtoYCBCR, changeBGRtoCIELAB, changeBGRtoCIELUV
 from multiResDescriptors import generateMultiResDescriptors
-from get2biggerAreas_contours import getBiggestContours
+from getBiggestAreasContours import getBiggestContours
 
 
 

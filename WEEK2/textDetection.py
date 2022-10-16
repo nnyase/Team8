@@ -3,7 +3,7 @@ import numpy as np
 import os
 from matplotlib import pyplot as plt
 from utils.managePKLfiles import store_in_pkl
-from get2biggerAreas_contours import getBiggestContours
+from getBiggestAreasContours import getBiggestContours
 
 def detectText(image):
     """ This functions returns the BBox of the text box in the input image given.
