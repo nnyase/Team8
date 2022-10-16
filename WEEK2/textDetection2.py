@@ -107,7 +107,7 @@ def detectTextBox(pathOfImage):
 
 inputPath = 'WEEK2/qsd1_w2/'
 outputPath = 'WEEK2/textBoxes/'
-detectTextBoxes(inputPath, outputPath, 2)
+detectTextBoxes(inputPath, outputPath, numberOfFile=2)
 
 evaluateTextBoxes('WEEK2/textBoxes/text_boxes2.pkl', "WEEK2/qsd1_w2/text_boxes.pkl")
 

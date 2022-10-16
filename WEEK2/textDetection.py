@@ -102,7 +102,7 @@ def detectText(image):
         maxY = 0
 
     
-    return [np.array([minX, minY]), np.array([minX, maxY]), np.array([maxX, maxY]), np.array([maxX, minY])]
+    return [minX, minY, maxX, maxY]
 
 
 def getBiggestContour(binaryImage):
@@ -135,134 +135,7 @@ def getBiggestContour(binaryImage):
     
     return biggestContour
 
-"""
-def detectText1(image, multiplePaintings = False):
-    
-    imageGray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    imageHSV = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-    imageS = imageHSV[:,:,1]
-    
-    imageSmallS = imageS < 20
-    
-    kernel = np.ones([3,3])
-    dilateImage = cv2.dilate(imageGray, kernel, 1)
-    erodeImage = cv2.erode(imageGray, kernel, 1)
-
-    morphologicalGradient = dilateImage - erodeImage
-    
-    morphologicalGradient = morphologicalGradient * imageSmallS 
-    
-    _, binary = cv2.threshold(morphologicalGradient, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    
-    kernel = np.ones([1,int(image.shape[1]/10)])
-    binaryClose = cv2.morphologyEx(binary,cv2.MORPH_CLOSE, kernel)
-    
-    kernel = np.ones([5,5])
-    binaryOpen = cv2.morphologyEx(binaryClose,cv2.MORPH_OPEN, kernel)
-    #bigGradient = ((morphologicalGradient>130)*255).astype(np.uint8)
-    #morphologicalGradient = bigGradient * imageSmallS
-    
-    #kernel = np.ones((7,7))
-    #bigGCD = cv2.dilate(bigGradient, kernel, 1)
-    #kernel = np.ones((9,9))
-    #bigGCE = cv2.erode(bigGCD, kernel, 1)
-    #kernel = np.ones((5,5))
-    
-    #bigGCO = cv2.morphologyEx(bigGCC, cv2.MORPH_OPEN, kernel)
-    
-    return binaryOpen#detectRectangle(bigGCE)
-
-
-def detectRectangle(textImage):
-    iMin = textImage.shape[0]-1
-    iMax = 0
-    jMin = textImage.shape[1]-1
-    jMax = 0
-    
-    for i in range(textImage.shape[0]):
-        for j in range(textImage.shape[1]):
-            
-            if textImage[i,j] == 255:
-                if i > iMax:
-                    iMax = i
-                    
-                if i < iMin:
-                    iMin = i
-                    
-                if j > jMax:
-                    jMax = j
-                
-                if j < jMin:
-                    jMin = j
-    
-    textImage[iMin:iMax+1, jMin:jMax+1] = 255
-    
-    return textImage
-
-
-def distance(color1, color2):
-    
-    distance = color1.astype(int) - color2.astype(int)
-    
-    value = np.sqrt(distance[0]**2 + distance[1]**2 + distance[2]**2)
-    
-    return value
-    
-
-def postProcessMask(image, i, j):
-    
-    originalColor = image[i,j]
-    
-    checked = np.zeros(image.shape[:2], dtype = np.uint8)
-    background = np.zeros(image.shape[:2], dtype = np.uint8) 
-    
-    queue = [(i,j)]
-    checked[i,j] = 255
-    background[i,j] = 255
-    
-    distanceMax = 10
-    
-    while len(queue) > 0:
-        i, j = queue.pop()
-        
-        if i + 1 < image.shape[0]:
-                
-                if checked[i+1,j] == 0:
-                    checked[i+1,j] = 255
-                    if distance(image[i+1,j], originalColor) < distanceMax:
-                        background[i + 1, j] = 255
-                    
-                        queue.append((i+1,j))
-                    
-        if i - 1 > 0:
-            if checked[i-1,j] == 0:
-                checked[i-1,j] = 255
-                if distance(image[i-1,j], originalColor) < distanceMax:
-                    background[i - 1, j] = 255
-                
-                    queue.append((i-1,j))
-        
-        if j + 1 < image.shape[1]:
-                
-                if checked[i,j+1] == 0:
-                    checked[i,j+1] = 255
-                    if distance(image[i,j+1], originalColor) < distanceMax:
-                        background[i, j+1] = 255
-                    
-                        queue.append((i,j+1))
-                    
-        if j - 1 > 0:
-            if checked[i,j-1] == 0:
-                checked[i,j-1] = 255
-                if distance(image[i,j-1], originalColor) < distanceMax:
-                    background[i, j-1] = 255
-                
-                    queue.append((i,j-1))
-                    
-
-    return background
-"""
-def detectTextBoxes(inputPath, outputPath,numberOfFile, multiplePaintings = "No", maskDir = None):
+def detectTextBoxes(inputPath, outputPath, multiplePaintings = "No", maskDir = None, numberOfFile = -1):
     """ This function detects the text boxes of the images that are in the input path.
     
 
@@ -276,6 +149,8 @@ def detectTextBoxes(inputPath, outputPath,numberOfFile, multiplePaintings = "No"
         Indication if the images can have more than one painting ("yes" or "no"). The default is "no".
     maskDir : str, optional
         Background mask path. If the image has multiple painting, indicate here the background masks path. The default is None.
+    numberOfFile, int, optional
+        Number of the file that will be in the result file: text_boxes{numberOfFile}.pkl. Otherwise will be: text_boxes.pkl.
 
     Returns
     -------
@@ -320,16 +195,22 @@ def detectTextBoxes(inputPath, outputPath,numberOfFile, multiplePaintings = "No"
                 if multiplePaintings == "yes":
                     xMin, yMin, _, _ = boxes[i] 
                     
-                    for j in range(len(detection)):
-                        detection[j][0] += xMin
-                        detection[j][1] += yMin
+                    detection[0] += xMin
+                    detection[1] += yMin
+                    detection[2] += xMin
+                    detection[3] += yMin
                 
                 resultsImage.append(detection)
                 
             results.append(resultsImage)
     
     # Store result
-    store_in_pkl(outputPath + "text_boxes" + str(numberOfFile) + ".pkl", results)
+    if numberOfFile == -1:
+        store_in_pkl(outputPath + "text_boxes.pkl", results)
+    else:
+        store_in_pkl(outputPath + "text_boxes" + str(numberOfFile) + ".pkl", results)
+    
+    
     
     return results
     

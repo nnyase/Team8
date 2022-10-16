@@ -85,11 +85,11 @@ def computeDescriptors(imagesPath, outputPath, colorSpace, numBins, histGenFunc,
                     # Add text box pixels to the mask
                     textBox = textBoxes[imageNum][i]
                     
-                    xMin = textBox[0][0] - xMinP
-                    yMin = textBox[0][1] - yMinP
+                    xMin = textBox[0] - xMinP
+                    yMin = textBox[1] - yMinP
                     
-                    xMax = textBox[2][0] - xMinP
-                    yMax = textBox[2][1] - yMinP
+                    xMax = textBox[2] - xMinP
+                    yMax = textBox[3] - yMinP
                     
                     maskNew[yMin:yMax + 1, xMin:xMax + 1] = 0
                     

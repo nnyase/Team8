@@ -64,13 +64,14 @@ def meanIoU(boxes1, boxes2):
 
     sumIoU = 0
     numBoxes = 0
-    # Sum every boxes iou
+    # Sum every boxes in images
     for i in range(len(boxes1)):
         numBoxes += max(len(boxes1[i]), len(boxes2[i]))
         
+        # Sum every boxes in paintings
         for j in range(min(len(boxes1[i]), len(boxes2[i]))):
-            box1 = [boxes1[i][j][0][0], boxes1[i][j][0][1], boxes1[i][j][2][0], boxes1[i][j][2][1]]
-            box2 = [boxes2[i][j][0][0], boxes2[i][j][0][1], boxes2[i][j][2][0], boxes2[i][j][2][1]]
+            box1 = boxes1[i][j]
+            box2 = boxes2[i][j]
         
             sumIoU += iou(box1, box2)
     
