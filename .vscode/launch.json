@@ -1,0 +1,34 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python : Fichier actuel",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": ["-bbddDir", "../WEEK1/BBDD/", 
+                    "-qDir", "../WEEK1/qsd2_w1/",
+                    "-dDir", "descriptors/",
+                    "-hType", "2D",
+                    "-bins2D", "<45>",
+                    "-levels", "<0>",
+                    "-rDir", "results/",
+                    "-disF", "l1",
+                    "-rK", "10",
+                    "-c", "cielab",
+                    "-bRem", "yes",
+                    "-maskDir", "masks/",
+                    "-gtR", "../WEEK1/qsd2_w1/gt_corresps.pkl",
+                    "-gtM", "../WEEK1/qsd2_w1/"]
+
+            
+           
+            
+        }
+    ]
+}

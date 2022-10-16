@@ -90,55 +90,12 @@ def get_binary_mask3(myimage):
     return postProcessMask(binary_mask[:,:,0])
 
 
+
+
+
 # Giving a binary mask, it removes all not connected background areas with the most external
 # component
-def postProcessMask(binary_mask):
-    checked = np.zeros(binary_mask.shape, dtype = np.uint8)
-    background = np.zeros(binary_mask.shape, dtype = np.uint8) 
-    
-    queue = [(0,0)]
-    checked[0,0] = 255
-    background[0,0] = 255
-    
-    while len(queue) > 0:
-        i, j = queue.pop()
-        
-        if i + 1 < binary_mask.shape[0]:
-                
-                if checked[i+1,j] == 0:
-                    checked[i+1,j] = 255
-                    if binary_mask[i+1,j] == 0:
-                        background[i + 1, j] = 255
-                    
-                        queue.append((i+1,j))
-                    
-        if i - 1 > 0:
-            if checked[i-1,j] == 0:
-                checked[i-1,j] = 255
-                if binary_mask[i-1,j] == 0:
-                    background[i - 1, j] = 255
-                
-                    queue.append((i-1,j))
-        
-        if j + 1 < binary_mask.shape[1]:
-                
-                if checked[i,j+1] == 0:
-                    checked[i,j+1] = 255
-                    if binary_mask[i,j+1] == 0:
-                        background[i, j+1] = 255
-                    
-                        queue.append((i,j+1))
-                    
-        if j - 1 > 0:
-            if checked[i,j-1] == 0:
-                checked[i,j-1] = 255
-                if binary_mask[i,j-1] == 0:
-                    background[i, j-1] = 255
-                
-                    queue.append((i,j-1))
-        
-    bg = 255- background
-    return bg
+v
                 
         
                 

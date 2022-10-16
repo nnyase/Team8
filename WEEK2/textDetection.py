@@ -262,7 +262,7 @@ def postProcessMask(image, i, j):
 
     return background
 """
-def detectTextBoxes(inputPath, outputPath, multiplePaintings = "No", maskDir = None):
+def detectTextBoxes(inputPath, outputPath,numberOfFile, multiplePaintings = "No", maskDir = None):
     """ This function detects the text boxes of the images that are in the input path.
     
 
@@ -329,13 +329,13 @@ def detectTextBoxes(inputPath, outputPath, multiplePaintings = "No", maskDir = N
             results.append(resultsImage)
     
     # Store result
-    store_in_pkl(outputPath + "text_boxes.pkl", results)
+    store_in_pkl(outputPath + "text_boxes" + str(numberOfFile) + ".pkl", results)
     
     return results
     
             
 
-inputPath = "../../WEEK2/qsd1_w2/"
-outputPath = "./textBoxes/"
+# inputPath = "../../WEEK2/qsd1_w2/"
+# outputPath = "./textBoxes/"
 
-detectTextBoxes(inputPath, outputPath)
+# detectTextBoxes(inputPath, outputPath , 1)
