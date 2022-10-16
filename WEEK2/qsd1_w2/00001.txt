@@ -1,1 +1,0 @@
-('Narcis Comadira', 'Paisatge')

@@ -41,7 +41,7 @@ def detectText(image):
     morphologicalGradient = morphologicalGradient * imageSmallS 
     
     # Binarize
-    _, binary = cv2.threshold(morphologicalGradient, 70, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    _, binary = cv2.threshold(morphologicalGradient, 70, 255, cv2.THRESH_BINARY)
     
     # Set edges to 0
     binary[0,:] = 0
@@ -50,7 +50,7 @@ def detectText(image):
     binary[:, binary.shape[1]-1] = 0
     
     # Put the letters together
-    kernel = np.ones([1,int(image.shape[1]/20)])
+    kernel = np.ones([1,int(image.shape[1]/25)])
     binaryClose1 = cv2.morphologyEx(binary,cv2.MORPH_CLOSE, kernel)
     
     # Remove noise
@@ -82,17 +82,19 @@ def detectText(image):
         minX = int(np.min(contour[:,0,0]))
         maxX = int(np.max(contour[:,0,0]))
         
-        diffX = int((maxX - minX)*0.03)
-        minX = max(0, minX-diffX)
-        maxX = min(image.shape[1], maxX + diffX)
-        
-        
         minY = int(np.min(contour[:,0,1]))
         maxY = int(np.max(contour[:,0,1]))
         
-        diffY = int((maxY - minY)*0.15)
+        
+        # Expand the bbox
+        diffX = int((maxX - minX)*0.03)
+        minX = max(0, minX-diffX)
+        maxX = min(image.shape[1] - 1, maxX + diffX)
+        
+        
+        diffY = int((maxY - minY)*0.30)
         minY = max(0, minY-diffY)
-        maxY = min(image.shape[0], maxY + diffY)
+        maxY = min(image.shape[0] - 1, maxY + diffY)
     
     
     else:
@@ -101,6 +103,7 @@ def detectText(image):
         minY = 0
         maxY = 0
 
+    cv2.rectangle(image,(minX,minY),(maxX,maxY),[0,0,255],2)
     
     return [minX, minY, maxX, maxY]
 

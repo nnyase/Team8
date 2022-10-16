@@ -80,6 +80,21 @@ def meanIoU(boxes1, boxes2):
         
 
 def evaluateTextBoxes(resultFile, predictedFile):
+    """
+    This function evaluates the mIoU between the two path of .pkl files given.
+
+    Parameters
+    ----------
+    resultFile : str
+        Path of the .pkl file of the ground-truth text boxes.
+    predictedFile : str
+        Path of the .pkl file of the predicted text boxes.
+
+    Returns
+    -------
+    None.
+
+    """
     result = read_pkl(resultFile)
     predicted = read_pkl(predictedFile)
     

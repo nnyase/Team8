@@ -72,6 +72,7 @@ def evaluateBackgroundMasks(gt_masks, maskFolder, background_func):
     # Calculate Precision, Recall, F1
     metrics(TP,FN,FP)
     
+# Generate descriptors taking into account the folder management
 def genAndStoreDescriptors(color_spaces, hist_types, bins_2d, bins_3d, levels, descriptor_dir, images_dir, database_name, 
                            maskFolder = None, background_func = None, textBoxes = None, multiple_paintings = "no"):
                         

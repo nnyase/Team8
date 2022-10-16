@@ -1,1 +1,0 @@
-('Josep Baques', 'Suite Mediterrania')
