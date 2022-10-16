@@ -68,10 +68,10 @@ Options:
   -mapK MAP_K_VALUES, --map_k_values MAP_K_VALUES
                         Which values of k use to evaluate using MAP. The default value is <1,5>.
   -gtR GT_RESULT, --gt_result GT_RESULT
-                        Ground-truth result of query.
+                        Ground-truth result of query. The default value is "None".
   -gtM GT_MASKS, --gt_masks GT_MASKS
                         Path where ground-truth masks are. The default value is "None".
-  -gtT GT_TEXT_BOXES, --gt_text_boxes GT_TEXT_BOXES. The default value is "None".
+  -gtT GT_TEXT_BOXES, --gt_text_boxes GT_TEXT_BOXES. 
                         Path where ground-truth text boxes are. The default value is "None".
 
 ```
