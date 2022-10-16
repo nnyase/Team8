@@ -29,10 +29,12 @@ main.py "-bbddDir ../../WEEK1/BBDD/ -qDir ../../WEEK2/qsd1_w2/ -hType all -bins2
                [-gtR GT_RESULT] [-gtM GT_MASKS] [-gtT GT_TEXT_BOXES]
 ``
 
-``
+```
+
 Options:
+
   -bbddDir BBDD_DIR, --BBDD_dir BBDD_DIR
-                        Path of bbdd images.
+						Path of bbdd images.
   -qDir QUERY_DIR, --query_dir QUERY_DIR
                         Path of query images.
   -dDir DESCRIPTOR_DIR, --descriptor_dir DESCRIPTOR_DIR
@@ -71,4 +73,5 @@ Options:
                         Path where ground-truth masks are. The default value is "None".
   -gtT GT_TEXT_BOXES, --gt_text_boxes GT_TEXT_BOXES. The default value is "None".
                         Path where ground-truth text boxes are. The default value is "None".
-``
+
+```
