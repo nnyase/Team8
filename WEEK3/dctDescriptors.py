@@ -1,34 +1,27 @@
-from skimage import feature
-import numpy as np
 import cv2
+import numpy as np
 
 
-def createLBPhistogram(image, num_blocks, radius, bins):
+def createDCTdescritor(image, num_blocks, k):
     """
-    This function creates the LBP histogram of the image given. The radius for the LBP and the number
-    of bins of the result histogram are given.
+    This function creates the DCT descriptors of the input image
 
     Parameters
     ----------
     image : numpy array (np.uint8)
-        image to compute the lbp histogram.
-    num_blocs: int
-        number of block to divide each image
-    radius : int
-        radius number to compute lbp.
-    bins : int
-        number of bins of the histogram per block.
+        Image to generate descriptors.
+    num_blocks : int
+        Number of block to divide the image.
+    k : TYPE
+        Number of coefficients to take from each block.
 
     Returns
     -------
-    hist : numpy array 1D
-        lbp histogram result of the given image.
+    resultHist : 1D numpy array
+        Image descriptors.
 
     """
-
-    numPoints = 8*radius
-    
-    # Turn to grayscale image
+    # Turn image to grayscale
     imageG = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     
     # Init result
@@ -67,28 +60,25 @@ def createLBPhistogram(image, num_blocks, radius, bins):
         
             
             blockImage = imageG[actualH: actualH + roiH, actualW: actualW + roiW]
+            # Convert to float
+            blockImage = blockImage.astype(np.float32)/255.
             
             
-            # Compute lbp
-            lbp = feature.local_binary_pattern(blockImage, numPoints, radius, method="uniform")
+            # Calculate dct
+            dctBlockImage = cv2.dct(blockImage)
+            # Get zig-zag
+            dctBlockImageVector = np.concatenate([np.diagonal(dctBlockImage[::-1,:], i)[::(2*(i % 2)-1)] for i in range(1-dctBlockImage.shape[0], dctBlockImage.shape[0])])
             
-            # Compute histogram
-            (hist, _) = np.histogram(lbp.ravel(), bins=bins, range=(0, 2**numPoints - 1))
-            
+            # Get first k elements
+            blockDescriptor = dctBlockImageVector[:k]
             
             
             # Concatenate
-            resultHist = np.concatenate([resultHist, hist])
+            resultHist = np.concatenate([resultHist, blockDescriptor])
             
             actualW = actualW + roiW
         
         actualH = actualH + roiH 
-    
-    
-    # normalize the histogram
-    resultHist = resultHist.astype("float")
-    eps = 1e-7
-    resultHist /= (resultHist.sum() + eps)
-    
-    
+            
     return resultHist
+    
