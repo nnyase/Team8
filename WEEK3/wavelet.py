@@ -1,8 +1,8 @@
 import cv2
-import matplotlib.pyplot as plt
 import pywt
+import numpy as np
 
-def createWaveletDescriptor(image):
+def createWaveletDescriptor(image, bins, waveletType = 'haar'):
     """
     This function creates the wavelet descriptor of the diagonal details of the given image
 
@@ -10,22 +10,28 @@ def createWaveletDescriptor(image):
     ----------
     image : numpy array (np.uint8)
         Input image.
+    bins : int
+        number of bins of the resulting histogram
+    waveletType : str
+        type of wavelet used for the transformation
 
     Returns
     -------
-    fd : 1D numpy array
+    blockWaveletHistogram : 1D numpy array
         wavelet descriptor the diagonal details of the image
 
     """
-    
     # Change to grayscale
     imageG = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
     
-    # Wavelet transform of image, and plot approximation and details
-    wavelets = pywt.dwt2(imageG, 'bior1.3')
-    approximation, (horizontalDetails, verticalDetails, diagonalDetails) = wavelets
+    # Wavelet transform of image, the output exists of four seperate images: 
+    # approximation, vertical details, horizontal details and diagonal details
+    wavedImage = pywt.wavedec2(imageG, waveletType, mode='periodization', level=3)
 
-    # To visualise the transformed image, use the code below
-    #plt.imshow(diagonalDetails, interpolation='nearest', cmap=plt.cm.gray)
-    
-    return diagonalDetails
+    # convert the four images into one image to get the wavelet representation of the image
+    arr, _ = pywt.coeffs_to_array(wavedImage)
+
+    # create the histogram of the wavelet representation of the block 
+    blockWaveletHistogram, _ = np.histogram(arr, bins = bins, range = (0, 255))
+
+    return blockWaveletHistogram

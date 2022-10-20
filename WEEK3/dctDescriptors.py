@@ -12,7 +12,7 @@ def createDCTdescritor(image, k, mask):
         Image to generate descriptors.
     num_blocks : int
         Number of block to divide the image.
-    k : TYPE
+    k : int
         Number of coefficients to take from each block.
 
     Returns
