@@ -2,7 +2,7 @@ import cv2
 import pywt
 import numpy as np
 
-def createWaveletDescriptor(image, bins, waveletType = 'haar'):
+def createWaveletDescriptor(image, k, waveletType = 'haar'):
     """
     This function creates the wavelet descriptor of the diagonal details of the given image
 
@@ -11,14 +11,14 @@ def createWaveletDescriptor(image, bins, waveletType = 'haar'):
     image : numpy array (np.uint8)
         Input image.
     bins : int
-        number of bins of the resulting histogram
+        Number of coefficients to take from the image
     waveletType : str
         type of wavelet used for the transformation
 
     Returns
     -------
-    blockWaveletHistogram : 1D numpy array
-        wavelet descriptor the diagonal details of the image
+    waveletDescriptor : 1D numpy array
+        wavelet descriptor
 
     """
     # Change to grayscale
@@ -31,7 +31,9 @@ def createWaveletDescriptor(image, bins, waveletType = 'haar'):
     # convert the four images into one image to get the wavelet representation of the image
     arr, _ = pywt.coeffs_to_array(wavedImage)
 
-    # create the histogram of the wavelet representation of the block 
-    blockWaveletHistogram, _ = np.histogram(arr, bins = bins, range = (0, 255))
+    # create the zigzag of the wavelet representation of the block 
+    waveletBlockImageVector = np.concatenate([np.diagonal(arr[::-1,:], i)[::(2*(i % 2)-1)] for i in range(1-arr.shape[0], arr.shape[0])])
 
-    return blockWaveletHistogram
+    waveletDescriptor = waveletBlockImageVector[:k]
+
+    return waveletDescriptor
