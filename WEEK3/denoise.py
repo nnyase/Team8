@@ -1,6 +1,4 @@
 from crypt import methods
-from email import parser
-from email.parser import Parser
 import cv2
 import numpy as np
 import glob
@@ -9,14 +7,14 @@ import statistics
 import argparse
 from matplotlib import pyplot as plt
 
-'''
+
 def parse_args():
     parser = argparse.ArgumentParser(description='Generate median,bilateral and gaussian denoise')
-    parser.add_argument('-oDir','--original_dir',type=str,help='Original/non-augment directory of images(must end with /*.jpg)')
+    parser.add_argument('-oDir','--original_dir',type=str,help='Original/non-augment directory of images')
     parser.add_argument('-nDir','--noisy_dir',type=str,help='Noisy directory of images')
     parser.add_argument('-m','--method',type=str,help='Method of denoise: median, bilateral,gaussian, all')
+    parser.add_argument('-sIndex','--skip_index',type=bool,help='Skip Index for same images',default=[])
     return parser.parse_args()
-'''
 
 
 def denoise_images(noisy_imgs, method="median",skip_index=[]):
@@ -83,27 +81,17 @@ def denoise_nlmeans(img,h=10,hcolor=10,ws=7,sws=21):
 
 
 if __name__ == "__main__":
-    images = [cv2.imread(file) for file in glob.glob('WEEK3/data/qsd1_w3/*.jpg')]
-    clean_images = [cv2.imread(file) for file in glob.glob('WEEK3/data/qsd1_w3/non_augmented/*.jpg')]
+    args= parse_args()
+    original = args.original_dir + "*.jpg"
+    noisy = args.noisy_dir +"*.jpg"
+    images = [cv2.imread(file) for file in glob.glob(noisy)]
+    clean_images = [cv2.imread(file) for file in glob.glob(original)]
+    method=args.method
+    
+    if args.skip_index == True:
+        clean_index = cleanImageIndex(clean_images=clean_images,noisy_images=images)
+        denoised_images = denoise_images(images,method=method,skip_index=clean_index)
+    else: 
+        denoised_images = denoise_images(images,method=method,skip_index=[])
 
-
-    clean_index = cleanImageIndex(clean_images=clean_images,noisy_images=images)
-
-    median_denoise_images = denoise_images(images,method = 'median',skip_index=clean_index)
-    bilateral_denoise_images = denoise_images(images,method='bilateral',skip_index=clean_index)
-    gaussian_denoise_images = denoise_images(images, method ='gaussian',skip_index=clean_index)
-    nlmeans_denoise_images = denoise_images(images, method='nlmean',skip_index=clean_index)
-
-    '''
-    print("Augmented PSNR: ", "{:.2f}".format(meanPSNR(clean_images,images)))
-    print("median PSNR: ","{:.2f}".format(meanPSNR(clean_images,median_denoise_images)))
-    print("bilateral PSNR: ","{:.2f}".format(meanPSNR(clean_images,bilateral_denoise_images)))
-    print("gaussian PSNR: ","{:.2f}".format(meanPSNR(clean_images,gaussian_denoise_images)))
-    print("nlmeans PSNR: ","{:.2f}".format(meanPSNR(clean_images,nlmeans_denoise_images)))
-
-    print("Augmented SSIM: ", "{:.2f}".format(SSIM(clean_images,images)))
-    print("median SSIM: ","{:.2f}".format(SSIM(clean_images,median_denoise_images)))
-    print("bilateral SSIM: ","{:.2f}".format(SSIM(clean_images,bilateral_denoise_images)))
-    print("gaussian SSIM: ","{:.2f}".format(SSIM(clean_images,gaussian_denoise_images)))
-    print("nlmeans SSIM: ","{:.2f}".format(SSIM(clean_images,nlmeans_denoise_images)))
-    '''
+    
