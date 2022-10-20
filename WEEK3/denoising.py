@@ -2,7 +2,6 @@ import cv2
 from skimage.restoration import estimate_sigma, denoise_tv_bregman
 import numpy as np
 import os
-import matplotlib as plt
 
 def denoising(imagePath):
 
