@@ -2,7 +2,7 @@ from skimage.feature import hog
 import cv2
 import numpy as np
 
-def createHoGdescriptor(image, orientations, num_blocks):
+def createHoGdescriptor(image, orientations, mask):
     """
     This function creates the HoG descriptor of the given image
 
@@ -22,7 +22,7 @@ def createHoGdescriptor(image, orientations, num_blocks):
     imageG = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
     
     # Generate hog
-    pixels_per_block = (int(np.floor(image.shape[0]/num_blocks)), int(np.floor(image.shape[1]/num_blocks)))
+    pixels_per_block = (image.shape[0], image.shape[1])
     fd = hog(imageG, orientations, cells_per_block=(1, 1), pixels_per_cell = pixels_per_block, feature_vector = True)
     
     resultHist = fd.astype("float")

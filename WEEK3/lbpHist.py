@@ -3,7 +3,7 @@ import numpy as np
 import cv2
 
 
-def createLBPhistogram(image, num_blocks, radius, bins):
+def createLBPhistogram(image, bins, mask, radius = 1):
     """
     This function creates the LBP histogram of the image given. The radius for the LBP and the number
     of bins of the result histogram are given.
@@ -30,65 +30,19 @@ def createLBPhistogram(image, num_blocks, radius, bins):
     
     # Turn to grayscale image
     imageG = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+            
+    # Compute lbp
+    lbp = feature.local_binary_pattern(imageG, numPoints, radius, method="uniform")
     
-    # Init result
-    resultHist = []
-    
-            
-    # Compute histograms
-    difW = int(image.shape[1]/num_blocks)
-    remainingW = image.shape[1] % num_blocks
-    difH = int(image.shape[0]/num_blocks)
-    remainingH = image.shape[0] % num_blocks
-    
-    
-    actualH = 0
-    
-    
-    # Compute every block
-    for h in range(num_blocks):
-        # Compute roi height
-        if remainingH > 0:
-            roiH = difH + 1
-            remainingH -= 1
-        else:
-            roiH = difH
-        
-        actualW = 0
-        remainingW = image.shape[1] % num_blocks
-        
-        for w in range(num_blocks): 
-            # Compute roi width
-            if remainingW > 0:
-                roiW = difW + 1
-                remainingW -= 1
-            else:
-                roiW = difW
-        
-            
-            blockImage = imageG[actualH: actualH + roiH, actualW: actualW + roiW]
-            
-            
-            # Compute lbp
-            lbp = feature.local_binary_pattern(blockImage, numPoints, radius, method="uniform")
-            
-            # Compute histogram
-            (hist, _) = np.histogram(lbp.ravel(), bins=bins, range=(0, 2**numPoints - 1))
-            
-            
-            
-            # Concatenate
-            resultHist = np.concatenate([resultHist, hist])
-            
-            actualW = actualW + roiW
-        
-        actualH = actualH + roiH 
+    # Compute histogram
+    (hist, _) = np.histogram(lbp.ravel(), bins=bins, range=(0, numPoints + 2))
     
     
     # normalize the histogram
-    resultHist = resultHist.astype("float")
+    hist = hist.astype("float")
     eps = 1e-7
-    resultHist /= (resultHist.sum() + eps)
+    hist /= (hist.sum() + eps)
     
     
-    return resultHist
+    return hist
