@@ -1,12 +1,8 @@
-from crypt import methods
 import cv2
-import numpy as np
 import glob
-from utils.SimilarityMeasures import PSNR, meanPSNR, cleanImageIndex, SSIM, noise_checker
-import statistics
-import argparse
-from matplotlib import pyplot as plt
-
+from utils.SimilarityMeasures import cleanImageIndex 
+import argparse 
+from skimage.restoration import estimate_sigma  
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Generate median,bilateral and gaussian denoise')
@@ -35,7 +31,6 @@ def denoise_images(noisy_imgs, method="median",skip_index=[]):
             if index not in skip_index:
                 denoised_imgs.append(denoise_median(noisy_imgs[index]))
 
-
         #denoised_imgs = [denoise_median(noisy_imgs[noisy_img]) for noisy_img in range(len(noisy_imgs)) if noisy_img not in skip_index noisy_img[]]
     elif method == 'bilateral':
         for index,image in enumerate(noisy_imgs):
@@ -52,6 +47,10 @@ def denoise_images(noisy_imgs, method="median",skip_index=[]):
             if index not in skip_index:
                 denoised_imgs.append(denoise_nlmeans(noisy_imgs[index]))
 
+    elif method == "optimized":
+        for index,image in enumerate(noisy_imgs):
+            if index not in skip_index:
+                denoised_imgs.append(optimizedDenoising(noisy_imgs[index]))
 
     else: 
         print("Invaild Method")
@@ -80,6 +79,33 @@ def denoise_nlmeans(img,h=10,hcolor=10,ws=7,sws=21):
     return cv2.fastNlMeansDenoisingColored(src=img,h=10,hColor=hcolor,templateWindowSize=ws,searchWindowSize=sws)
 
 
+def optimizedDenoising(img):
+
+    """
+    This function denoise the image if the image contains noises
+
+    Parameters
+    ----------
+    imagePath : string
+        Path of the input image.
+    
+    Returns
+    -------
+    newImage : 2D numpy array
+        Ouput image denoised.
+
+    """
+
+    if estimate_sigma(img, channel_axis=-1, average_sigmas=True) >= 2:
+
+        return cv2.medianBlur(img, 3)
+
+    else:
+
+        return img.copy()
+
+
+
 if __name__ == "__main__":
     args= parse_args()
     original = args.original_dir + "*.jpg"
@@ -94,4 +120,3 @@ if __name__ == "__main__":
     else: 
         denoised_images = denoise_images(images,method=method,skip_index=[])
 
-    
