@@ -1,19 +1,17 @@
 import cv2
-import glob
-from utils.SimilarityMeasures import cleanImageIndex 
+import glob 
 import argparse 
 from skimage.restoration import estimate_sigma  
+import os
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Generate median,bilateral and gaussian denoise')
-    parser.add_argument('-oDir','--original_dir',type=str,help='Original/non-augment directory of images')
     parser.add_argument('-nDir','--noisy_dir',type=str,help='Noisy directory of images')
-    parser.add_argument('-m','--method',type=str,help='Method of denoise: median, bilateral,gaussian, all')
-    parser.add_argument('-sIndex','--skip_index',type=bool,help='Skip Index for same images',default=[])
+    parser.add_argument('-m','--method',type=str,help='Method of denoise: median, bilateral,gaussian, (Best) optimized')
     return parser.parse_args()
 
 
-def denoise_images(noisy_imgs, method="median",skip_index=[]):
+def denoise_images(noisy_imgs, method="median"):
     """ Denoise a list of images based on chosen method name
     Parameters
     --------------
@@ -28,29 +26,24 @@ def denoise_images(noisy_imgs, method="median",skip_index=[]):
 
     if method == 'median':
         for index,image in enumerate(noisy_imgs):
-            if index not in skip_index:
-                denoised_imgs.append(denoise_median(noisy_imgs[index]))
+            denoised_imgs.append(denoise_median(noisy_imgs[index]))
 
         #denoised_imgs = [denoise_median(noisy_imgs[noisy_img]) for noisy_img in range(len(noisy_imgs)) if noisy_img not in skip_index noisy_img[]]
     elif method == 'bilateral':
         for index,image in enumerate(noisy_imgs):
-            if index not in skip_index:
-                denoised_imgs.append(denoise_bilateral(noisy_imgs[index]))
+            denoised_imgs.append(denoise_bilateral(noisy_imgs[index]))
 
     elif method == 'gaussian':
         for index,image in enumerate(noisy_imgs):
-            if index not in skip_index:
-                denoised_imgs.append(denoise_gaussian(noisy_imgs[index]))
+            denoised_imgs.append(denoise_gaussian(noisy_imgs[index]))
 
     elif method == "nlmean":
         for index,image in enumerate(noisy_imgs):
-            if index not in skip_index:
-                denoised_imgs.append(denoise_nlmeans(noisy_imgs[index]))
+            denoised_imgs.append(denoise_nlmeans(noisy_imgs[index]))
 
     elif method == "optimized":
         for index,image in enumerate(noisy_imgs):
-            if index not in skip_index:
-                denoised_imgs.append(optimizedDenoising(noisy_imgs[index]))
+            denoised_imgs.append(optimizedDenoising(noisy_imgs[index]))
 
     else: 
         print("Invaild Method")
@@ -83,7 +76,6 @@ def optimizedDenoising(img):
 
     """
     This function denoise the image if the image contains noises
-
     Parameters
     ----------
     imagePath : string
@@ -93,7 +85,6 @@ def optimizedDenoising(img):
     -------
     newImage : 2D numpy array
         Ouput image denoised.
-
     """
 
     if estimate_sigma(img, channel_axis=-1, average_sigmas=True) >= 2:
@@ -108,15 +99,25 @@ def optimizedDenoising(img):
 
 if __name__ == "__main__":
     args= parse_args()
-    original = args.original_dir + "*.jpg"
     noisy = args.noisy_dir +"*.jpg"
     images = [cv2.imread(file) for file in glob.glob(noisy)]
-    clean_images = [cv2.imread(file) for file in glob.glob(original)]
     method=args.method
-    
-    if args.skip_index == True:
-        clean_index = cleanImageIndex(clean_images=clean_images,noisy_images=images)
-        denoised_images = denoise_images(images,method=method,skip_index=clean_index)
-    else: 
-        denoised_images = denoise_images(images,method=method,skip_index=[])
+    denoised_images = denoise_images(images,method=method)
 
+    path = 'WEEK3/denoiseImages/' + method + "/"
+    if "qsd1_w3" in noisy:
+        path_d1 = path + "qsd1_w3/"
+        if not os.path.exists(path_d1):
+            os.makedirs(path_d1)
+        
+        for index,image in enumerate(denoised_images):
+            
+            cv2.imwrite(path_d1 + "000"+ index + ".jpg", denoised_images[index])
+
+
+    elif "qsd2_w3" in noisy:
+        path_d2 = path + "qsd2_w3/"
+        if not os.path.exists(path_d2):
+            os.makedirs(path_d2)
+        for index,image in enumerate(denoised_images):
+            cv2.imwrite(path_d2 + "000" + index + ".jpg", denoised_images[index])
