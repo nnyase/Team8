@@ -6,7 +6,7 @@ import os
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Generate median,bilateral and gaussian denoise')
-    parser.add_argument('-nDir','--noisy_dir',type=str,help='Noisy directory of images')
+    parser.add_argument('-nDir','--noisy_dir',type=str,help='Original Imgaes to denoise')
     parser.add_argument('-m','--method',type=str,help='Method of denoise: median, bilateral,gaussian, (Best) optimized')
     return parser.parse_args()
 
@@ -17,7 +17,7 @@ def denoise_images(noisy_imgs, method="median"):
     --------------
     noisy: list of noisy images.
     method_name: Method to pick for denoising images [ "median", "bilateral",
-    "gaussian", "nlmeans"]
+    "gaussian", "nlmeans","optimized"]
     ----------
     returns 
     a list of denoised_images. 
@@ -87,7 +87,7 @@ def optimizedDenoising(img):
         Ouput image denoised.
     """
 
-    if estimate_sigma(img, channel_axis=-1, average_sigmas=True) >= 2:
+    if estimate_sigma(img, average_sigmas=True, multichannel= True) >= 2:
 
         return cv2.medianBlur(img, 3)
 
@@ -99,7 +99,7 @@ def optimizedDenoising(img):
 
 if __name__ == "__main__":
     args= parse_args()
-    noisy = args.noisy_dir +"*.jpg"
+    noisy = args.noisy_dir +"/*.jpg"
     images = [cv2.imread(file) for file in glob.glob(noisy)]
     method=args.method
     denoised_images = denoise_images(images,method=method)
@@ -109,15 +109,13 @@ if __name__ == "__main__":
         path_d1 = path + "qsd1_w3/"
         if not os.path.exists(path_d1):
             os.makedirs(path_d1)
-        
         for index,image in enumerate(denoised_images):
-            
-            cv2.imwrite(path_d1 + "000"+ index + ".jpg", denoised_images[index])
-
+            cv2.imwrite(path_d1 + "0000"+ str(index) + ".jpg", denoised_images[index])
+        
 
     elif "qsd2_w3" in noisy:
         path_d2 = path + "qsd2_w3/"
         if not os.path.exists(path_d2):
             os.makedirs(path_d2)
         for index,image in enumerate(denoised_images):
-            cv2.imwrite(path_d2 + "000" + index + ".jpg", denoised_images[index])
+            cv2.imwrite(path_d2 + "0000" + str(index) + ".jpg", denoised_images[index])
