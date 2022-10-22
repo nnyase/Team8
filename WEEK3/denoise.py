@@ -103,6 +103,11 @@ if __name__ == "__main__":
     images = [cv2.imread(file) for file in glob.glob(noisy)]
     method=args.method
     denoised_images = denoise_images(images,method=method)
+    fileNames = os.listdir(args.noisy_dir)
+    jpgFiles =[]
+    for name in fileNames:
+        if name[-4:] == ".jpg":
+            jpgFiles.append(name)
 
     path = 'WEEK3/denoiseImages/' + method + "/"
     if "qsd1_w3" in noisy:
@@ -110,7 +115,7 @@ if __name__ == "__main__":
         if not os.path.exists(path_d1):
             os.makedirs(path_d1)
         for index,image in enumerate(denoised_images):
-            cv2.imwrite(path_d1 + "0000"+ str(index) + ".jpg", denoised_images[index])
+            cv2.imwrite(path_d1 + jpgFiles[index], denoised_images[index])
         
 
     elif "qsd2_w3" in noisy:
@@ -118,4 +123,5 @@ if __name__ == "__main__":
         if not os.path.exists(path_d2):
             os.makedirs(path_d2)
         for index,image in enumerate(denoised_images):
-            cv2.imwrite(path_d2 + "0000" + str(index) + ".jpg", denoised_images[index])
+            cv2.imwrite(path_d2 + jpgFiles[index] + str(index) + ".jpg", denoised_images[index])
+
