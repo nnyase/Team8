@@ -9,7 +9,7 @@ from textDDetection import detectTextBoxes
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 '''
-                This script contains three main functions :
+                This script contains four main functions :
                     
                  1.-   getTextDescriptorsFromImages:
                          By giving a set of images it will extract the text on them based in
@@ -23,6 +23,9 @@ pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tessera
                  3.-   saveBestKmatches_Text:
                          This function computes all the similarities between the database and query painting names
                              using the distance function given and returns k best matches for every query image
+                             
+                 4.-  loadNPY:
+                          This function reads all PNY files inside a folder and prints them 
                 
 
  '''
