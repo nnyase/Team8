@@ -1,4 +1,14 @@
 
 *.pyc
 WEEK2/Descriptors/
-WEEK3/descriptors/
+WEEK3/descriptors/qsd1_w2/
+WEEK3/descriptors/BBDD/dct/
+WEEK3/descriptors/BBDD/lbp/
+WEEK3/descriptors/BBDD/wavelet/
+WEEK3/descriptors/BBDD/wavelet_0/
+WEEK3/descriptors/BBDD/hog/levels_0/
+WEEK3/descriptors/BBDD/hog/levels_1/
+WEEK3/descriptors/BBDD/hog/levels_2/
+WEEK3/descriptors/BBDD/hog/levels_3/features_10/
+WEEK3/descriptors/BBDD/hog/levels_3/features_40/
+WEEK3/descriptors/BBDD/hog/levels_3/features_80/

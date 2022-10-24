@@ -43,6 +43,7 @@ def denoise_images(noisy_imgs, method="median"):
 
     elif method == "optimized":
         for index,image in enumerate(noisy_imgs):
+            #print(index)
             denoised_imgs.append(optimizedDenoising(noisy_imgs[index]))
 
     else: 
@@ -87,7 +88,9 @@ def optimizedDenoising(img):
         Ouput image denoised.
     """
 
-    if estimate_sigma(img, average_sigmas=True, multichannel= True) >= 2:
+    #print(estimate_sigma(img, average_sigmas=True, channel_axis = 2))
+    if estimate_sigma(img, average_sigmas=True, channel_axis = 2) >= 5: #2
+        
 
         return cv2.medianBlur(img, 3)
 
@@ -109,12 +112,13 @@ if __name__ == "__main__":
         if name[-4:] == ".jpg":
             jpgFiles.append(name)
 
-    path = 'WEEK3/denoiseImages/' + method + "/"
+    path = './denoisedImages/' + method + "/"
     if "qsd1_w3" in noisy:
         path_d1 = path + "qsd1_w3/"
         if not os.path.exists(path_d1):
             os.makedirs(path_d1)
         for index,image in enumerate(denoised_images):
+            
             cv2.imwrite(path_d1 + jpgFiles[index], denoised_images[index])
         
 

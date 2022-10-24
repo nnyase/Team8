@@ -135,7 +135,7 @@ def mainProcess():
     bins_2d = 20
     levels = 3
     
-    texture_types = ["lbp", "dct", "hog"]#, "wavelet"]
+    texture_types = ["lbp", "dct", "hog", "wavelet"]
     
     # Get args
     args = parse_args()

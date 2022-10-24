@@ -2,7 +2,7 @@ import cv2
 import pywt
 import numpy as np
 
-def createWaveletDescriptor(image, k, waveletType = 'haar'):
+def createWaveletDescriptor(image, k, mask, waveletType = 'haar'):
     """
     This function creates the wavelet descriptor of the diagonal details of the given image
 
