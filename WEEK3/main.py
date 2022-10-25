@@ -9,7 +9,8 @@ from generateDescriptors import computeColorDescriptors, computeTextureDescripto
 from hist2Doptimized import Create2DHistogram
 from textDetection import detectTextBoxes
 from meanIou import evaluateTextBoxes
-
+from OCR import computeTextDescriptorsFromImages, computeTextDescriptorsFromTxt
+from utils.distanceTextMetrics import TEXT_DISTANCE_FUNCS
 
 
 def parse_args():
@@ -17,11 +18,7 @@ def parse_args():
     parser.add_argument('-bbddDir', '--BBDD_dir', type=str, help='Path of bbdd images')
     parser.add_argument('-qDir', '--query_dir', type=str, help='Path of query images')
     parser.add_argument('-dDir', '--descriptor_dir', type=str, default = "./descriptors/", help='Path where descriptors will be saved')
-    parser.add_argument('-dColor', '--color_des', type=str, default = "no", help='Indicate if color descriptor has to be used')
-    parser.add_argument('-dTexture', '--texture_des', type=str, default = "no", help='Indicate if texture descriptor has to be used')
-    parser.add_argument('-numFeatures', '--num_features', type=str, default = "<160>", help='Number of features for each block')
-    parser.add_argument('-iLvlTexture', '--levels_texture', type=str, default = "<3>", help='Number of levels for multiresolution in texture descriptors')
-    parser.add_argument('-tType', '--texture_type', type=str, default = "hog", help='Texture type used to compute descriptors')
+    parser.add_argument('-dType', '--des_type', type=str, default = "<color,texture,text>", help='Indicate the descriptor combination')
     parser.add_argument('-tBox', '--text_boxes', default = "no", type = str, help='Indicate if text boxes has to be detected')
     parser.add_argument('-tBoxDir', '--text_boxes_dir', default = "./textBoxes/", type = str, help='Path where detected text boxes will be saved')
     parser.add_argument('-rDir', '--results_dir', type=str, default = "./results/", help='Path where retrieval results will be saved')
@@ -83,7 +80,7 @@ def genAndStoreColorDescriptors(color_space, hist_type, bins_2d, levels, descrip
     else:
         folderName = color_space + "/" + pathDifferentHist
         
-    folderPath = descriptor_dir + database_name + "/" + folderName
+    folderPath = descriptor_dir + database_name + "/color/" + folderName
     
     if not os.path.exists(folderPath):
         os.makedirs(folderPath)
@@ -95,62 +92,154 @@ def genAndStoreColorDescriptors(color_space, hist_type, bins_2d, levels, descrip
         print(database_name, " descriptors generated!")
                 
 # Generate texture descriptors taking into account the folder management
-def genAndStoreTextureDescriptors(textureTypes, levels, num_features, descriptor_dir, images_dir, database_name, 
+def genAndStoreTextureDescriptors(textureType, levels, num_features, descriptor_dir, images_dir, database_name, 
                            maskFolder = None, background_func = None, textBoxes = None, multiple_paintings = "no"):
     
+     
+    namePath = "levels_" + str(levels) + "/" + "features_" + str(num_features) + "/"
     
-    for textureType in textureTypes:  
-        for level in levels:
+    # Create folder
+    if not(maskFolder is None):
+        folderName = textureType + "_" + background_func + "/"
+    else:
+        folderName = textureType + "/" 
+        
+    folderPath = descriptor_dir + database_name + "/texture/" + folderName + namePath
+    
+    if not os.path.exists(folderPath):
+        os.makedirs(folderPath)
+        
+        computeTextureDescriptors(images_dir, folderPath, textureType, levels, num_features,
+                           backgroundMaskDir = maskFolder, textBoxes = textBoxes, 
+                           multipleImages= multiple_paintings)
+        
+        print(database_name, " descriptors generated!")
+
+# Generate texture descriptors taking into account the folder management
+def genAndStoreTextDescriptors(descriptor_dir, images_dir, database_name, textBoxes = None,
+                           maskFolder = None, background_func = None, multiple_paintings = "no"):
+    
+     
+    
+    # Create folder
+    if not(maskFolder is None):
+        folderName = background_func + "/"
+    else:
+        folderName = "" 
+        
+    folderPath = descriptor_dir + database_name + "/text/" + folderName
+    
+    if not os.path.exists(folderPath):
+        os.makedirs(folderPath)
+        
+        if database_name == "BBDD":
+            computeTextDescriptorsFromTxt(images_dir, folderPath)
+        else:
+            computeTextDescriptorsFromImages(images_dir, folderPath, textBoxes,
+                               backgroundMaskDir = maskFolder, 
+                               multipleImages= multiple_paintings)
+        
+        print(database_name, " descriptors generated!")
+   
+# Function to compute retrieval using the folder management and save the pkl file
+def computeRetrieval(args, queryName, des_combination, distance_func_text, distance_func_text_index, distance_func_vector, levels,
+                     num_features, texture_type, hist_type, bins_2d, color_space, background_func = None):
+    # Output path PKL file
+    outputPath = args.results_dir + queryName + "/"
+    
+    queryDesP = []
+    bbddDesP = []
+    
+    for des in des_combination:
+        outputPath = outputPath + des + "_"
+        
+        
+        if des == "text":
+            outputPath = outputPath + "_" + distance_func_text + "_"
             
-            for num in num_features:
+            pathBBDDdescriptors = args.descriptor_dir + "BBDD/text/"
+            if args.background_rem != "no": 
+                pathQdescriptors = args.descriptor_dir + queryName + "/text/" + background_func + "/"
+            else:
+                pathQdescriptors = args.descriptor_dir + queryName + "/text/"
+                
             
-                   
-                
-                namePath = "levels_" + str(level) + "/" + "features_" + str(num) + "/"
-                
-                # Create folder
-                if not(maskFolder is None):
-                    folderName = textureType + "_" + background_func + "/"
-                else:
-                    folderName = textureType + "/" 
-                    
-                folderPath = descriptor_dir + database_name + "/" + folderName + namePath
-                
-                if not os.path.exists(folderPath):
-                    os.makedirs(folderPath)
-                    
-                    computeTextureDescriptors(images_dir, folderPath, textureType, level, num,
-                                       backgroundMaskDir = maskFolder, textBoxes = textBoxes, 
-                                       multipleImages= multiple_paintings)
-                    
-                    print(database_name, " descriptors generated!")
+            bbddDesP.append(pathBBDDdescriptors)
+            queryDesP.append(pathQdescriptors)
             
+            
+        elif des == "texture":
+            outputPath = outputPath + "_" + distance_func_vector + "_"
+            
+            namePath = "levels_" + str(levels) + "/" + "features_" + str(num_features) + "/"
+            pathBBDDdescriptors = args.descriptor_dir + "BBDD/" + texture_type + "/" + namePath
+            if args.background_rem == "no":
+                pathQdescriptors = args.descriptor_dir + queryName + "/texture/" + texture_type + "/" + namePath
+            else:
+                pathQdescriptors = args.descriptor_dir + queryName + "/texture/" + texture_type + "_" + background_func + "/" + namePath
+                
+            bbddDesP.append(pathBBDDdescriptors)
+            queryDesP.append(pathQdescriptors)
+            
+        elif des == "color":
+            outputPath = outputPath + "_" + distance_func_vector + "_"
+            
+            pathDifferentHist = "level_" + str(levels) + "/" + hist_type + "_bins_" + str(bins_2d) + "/"
+            pathBBDDdescriptors = args.descriptor_dir + "BBDD/color/" + color_space + "/" + pathDifferentHist
+            if args.background_rem == "no":
+                pathQdescriptors = args.descriptor_dir + queryName + "/color/" + color_space + "/" + pathDifferentHist
+            else:
+                pathQdescriptors = args.descriptor_dir + queryName + "/color/" + color_space + "_" + background_func + "/" + pathDifferentHist
+            
+            bbddDesP.append(pathBBDDdescriptors)
+            queryDesP.append(pathQdescriptors)
+        
+    outputPath = outputPath[:-1]
+    
+    if not os.path.exists(outputPath):
+        os.makedirs(outputPath)
+        #computeRetrieval(bbddDesP, queryDesP, outputPath, distance_func_text_index, distance_func_vector)
+        
+        print("Retrieval done!")
+    
+    return outputPath
+       
 
 def mainProcess():
-    # All available posibilities
+    # Color best combination
     color_space = "cielab"
     hist_type = "2D"
-    distance_func = "l1"
+    distance_func_vector = "l1"
     background_func = "method3"
     bins_2d = 20
     levels = 3
     
-    texture_types = ["lbp", "dct", "hog", "wavelet"]
+    # Texture best combination
+    texture_type = "hog" # ["lbp", "dct", "hog", "wavelet"]
+    num_features = 160
+    
+    # Text
+    distance_func_text_index = 15
+    distance_func_text = TEXT_DISTANCE_FUNCS[distance_func_text_index]
+    
+    
+    descriptor_available_types = ["text", "color", "texture"]
     
     # Get args
     args = parse_args()
     
-    if args.texture_type != "all":
-        if args.texture_type in texture_types:
-            texture_types = [args.texture_type]
-        else:
-            print("Not a valid texture type!")
-            return
     
     # Get list arguments
     map_k_values = [int(k) for k in args.map_k_values[1:-1].split(",")]
-    num_features = [int(k) for k in args.num_features[1:-1].split(",")]
-    levels_texture = [int(k) for k in args.levels_texture[1:-1].split(",")]
+
+
+    des_combination = args.des_type[1:-1].split(",")
+    
+    # Check if descriptor combination is valid
+    for des_type in des_combination:
+        if des_type not in descriptor_available_types:
+            print("Not a valid descriptor type!")
+            return
     
     # Get query name
     queryName = args.query_dir.split('/')[-2]
@@ -180,7 +269,8 @@ def mainProcess():
         
         evaluateTextBoxes(args.gt_text_boxes, args.text_boxes_dir + "text_boxes.pkl")
     
-    if args.color_des == "yes":
+    # Create color descriptors if there are in the combination
+    if "color" in des_combination:
     
         # Generate color the descriptors of BBDD if they are not already generated
         genAndStoreColorDescriptors(color_space, hist_type, bins_2d, levels, args.descriptor_dir, 
@@ -191,143 +281,63 @@ def mainProcess():
                                args.query_dir, queryName, maskFolder, background_func, textBoxes, 
                                args.multiple_paintings)
     
-    if args.texture_des == "yes":
+    # Create texture descriptors if there are in the combination
+    if "texture" in des_combination:
     
         # Generate texture the descriptors of BBDD if they are not already generated
-        genAndStoreTextureDescriptors(texture_types, levels_texture, num_features, args.descriptor_dir, 
+        genAndStoreTextureDescriptors(texture_type, levels, num_features, args.descriptor_dir, 
                                args.BBDD_dir, "BBDD")
         
         # Generate texture the descriptors of query if they are not generated
-        genAndStoreTextureDescriptors(texture_types, levels_texture, num_features, args.descriptor_dir, 
+        genAndStoreTextureDescriptors(texture_type, levels, num_features, args.descriptor_dir, 
                                args.query_dir, queryName, maskFolder, background_func, textBoxes, 
                                args.multiple_paintings)
     
+    # Create text descriptors if there are in the combination
+    if "text" in des_combination:
+        
+        # Generate text descriptors of BBDD if they are not already generated
+        genAndStoreTextDescriptors(args.descriptor_dir, args.BBDD_dir, "BBDD")
+        
+        # Generate text descriptors of query if they are not generated
+        genAndStoreTextDescriptors(args.descriptor_dir, args.query_dir, queryName, 
+                                   maskFolder, background_func, textBoxes, args.multiple_paintings)
+    
     
     # Compute retrieval       
-    # Get descriptor folders
-    if args.color_des == "yes":
-        
-        pathDifferentHist = "level_" + str(levels) + "/" + hist_type + "_bins_" + str(bins_2d) + "/"
-        pathBBDDdescriptors = args.descriptor_dir + "BBDD/" + color_space + "/" + pathDifferentHist
-        if args.background_rem == "no":
-            pathQdescriptors = args.descriptor_dir + queryName + "/" + color_space + "/" + pathDifferentHist
-        else:
-            pathQdescriptors = args.descriptor_dir + queryName + "/" + color_space + "_" + background_func + "/" + pathDifferentHist
-    
-        # Compute results using distance function
-            
-        # Create folder
-        if args.background_rem == "no":
-            folderName =  color_space + "_" + distance_func + "/" + pathDifferentHist
-        else:
-            folderName =  color_space + "_" + distance_func + "_" + background_func + "/" + pathDifferentHist
-            
-        folderPath = args.results_dir + queryName + "/" + folderName
-        
-        if not os.path.exists(folderPath):
-            os.makedirs(folderPath)
-        
-    
-            # Compute result
-            result = saveBestKmatches(pathBBDDdescriptors, pathQdescriptors, args.result_k, distance_func)
-            
-            # Store results
-            store_in_pkl(folderPath + "result.pkl", result)
-            
-            print("Retrieval done!")
-    
-    if args.texture_des == "yes":
-        
-        for textureType in texture_types:
-            
-            for level in levels_texture:
-                
-                for num in num_features:
-                
-                       
-                    
-                    namePath = "levels_" + str(level) + "/" + "features_" + str(num) + "/"
-                    pathBBDDdescriptors = args.descriptor_dir + "BBDD/" + textureType + "/" + namePath
-                    if args.background_rem == "no":
-                        pathQdescriptors = args.descriptor_dir + queryName + "/" + textureType + "/" + namePath
-                    else:
-                        pathQdescriptors = args.descriptor_dir + queryName + "/" + textureType + "_" + background_func + "/" + namePath
-                    
-                    # Compute results using distance function
-                        
-                    # Create folder
-                    if args.background_rem == "no":
-                        folderName =  textureType + "_" + distance_func + "/" + namePath
-                    else:
-                        folderName =  textureType + "_" + distance_func + "_" + background_func + "/" + namePath
-                        
-                    folderPath = args.results_dir + queryName + "/" + folderName
-                    
-                    if not os.path.exists(folderPath):
-                        os.makedirs(folderPath)
-                    
-                    
-                        # Compute result
-                        result = saveBestKmatches(pathBBDDdescriptors, pathQdescriptors, args.result_k, distance_func)
-                        
-                        # Store results
-                        store_in_pkl(folderPath + "result.pkl", result)
-                        
-                        print("Retrieval done!")
+    resultsPath = computeRetrieval(args, queryName, des_combination, distance_func_text, distance_func_text_index, 
+                                   distance_func_vector, levels, num_features, texture_type, hist_type, bins_2d, 
+                                   color_space, background_func = None)
     
     # Compute retrieval evaluation if there is GT result
     if args.gt_result != "None":
+        
         # Read GT 
         gtResults = read_pkl(args.gt_result)
         
-        if args.color_des == "yes":
-                
-            # Get result file path
-            pathDifferentHist = "level_" + str(levels) + "/" + hist_type + "_bins_" + str(bins_2d) + "/"
-            if args.background_rem == "no":
-                pathResults = args.results_dir + queryName + "/" + color_space + "_" + distance_func + "/" + pathDifferentHist + "/result.pkl"
-            else:
-                pathResults = args.results_dir + queryName + "/" + color_space + "_" + distance_func + "_" + background_func + "/" + pathDifferentHist + "/result.pkl"
-    
-            # Read prediction results
-            predictedResults = read_pkl(pathResults)
         
-            for k in map_k_values:
-                # Compute mapk evaluation
-                mapkValue = mapkL(gtResults, predictedResults, k)
-                
-                # Print results
-                print("Color space: ", color_space, ", distance func: ", distance_func, ", Background_Rem: ", 
-                      args.background_rem, ", hist_type: ", hist_type, ", numBins: ", bins_2d, ", levels: ", levels, 
-                      ", MAP%", k, " score is: ", mapkValue)
+        # Read prediction results
+        predictedResults = read_pkl(resultsPath + "/result.pkl")
         
-        if args.texture_des == "yes":
+        print("Combination:")
+        for des in des_combination:
+            if des == "text":
+                print("Text distance function: ", distance_func_text)
+            elif des == "texture":
+                print("Vector distance function: ", distance_func_vector)
+            elif des == "color":
+                print("Vector distance function: ", distance_func_vector)
+                
+            print(des)
             
-            for textureType in texture_types:
-                
-                for level in levels_texture:
-                    
-                    for num in num_features:
-                    
-                           
-                        
-                        namePath = "levels_" + str(level) + "/" + "features_" + str(num) + "/"
-                        # Get result file path
-                        if args.background_rem == "no":
-                            pathResults = args.results_dir + queryName + "/" + textureType + "_" + distance_func + "/" + namePath + "/result.pkl"
-                        else:
-                            pathResults = args.results_dir + queryName + "/" + textureType + "_" + distance_func + "_" + background_func + namePath + "/result.pkl"
-                
-                        # Read prediction results
-                        predictedResults = read_pkl(pathResults)
-                    
-                        for k in map_k_values:
-                            # Compute mapk evaluation
-                            mapkValue = mapkL(gtResults, predictedResults, k)
-                            
-                            # Print results
-                            print("Texture type: ", textureType, ", levels: ", level, ", num features: ", num, ", distance func: ", distance_func, ", Background_Rem: ", 
-                                  args.background_rem, ", MAP%", k, " score is: ", mapkValue)
+        
+        for k in map_k_values:
+            # Compute mapk evaluation
+            mapkValue = mapkL(gtResults, predictedResults, k)
+            
+            # Print results
+            print("MAP%", k, " score is: ", mapkValue)
+        
 
 if __name__ == "__main__":
 

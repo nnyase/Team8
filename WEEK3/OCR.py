@@ -7,6 +7,9 @@ from utils.distanceTextMetrics import getDistance2Strings
 import textdistance
 from textDDetection import detectTextBoxes
 from mapk import mapkL
+from getBiggestAreasContours import getBiggestContours
+
+
 pytesseract.pytesseract.tesseract_cmd = r'C:/Users/inigo/anaconda3/envs/py38/Library/bin/tesseract.exe'
 
 '''
@@ -15,11 +18,11 @@ pytesseract.pytesseract.tesseract_cmd = r'C:/Users/inigo/anaconda3/envs/py38/Lib
                  1.-   getTextDescriptorsFromImages:
                          By giving a set of images it will extract the text on them based in
                          the boxes coordinates obtained from detectTextBoxes function  
-                         , it stores the extracted text in PNY or txt files in the outputPah
+                         , it stores the extracted text in NPY or txt files in the outputPah
                          
                  2.-   getTextDescriptorsFomTxtFiles:
                          By giving a set of text files it extracts the painting name from the string
-                         and stores it in a PNY  or txt file 
+                         and stores it in a NPY  or txt file 
                      
                  3.-   saveBestKmatches_Text:
                          This function computes all the similarities between the database and query painting names
@@ -89,7 +92,8 @@ def extractTextOnce(img,BBox):
     #print(text)
     return text
 
-def getTextDescriptorsFromImages(inputPath, outputPath,pny_OR_txt,createPKL):
+def computeTextDescriptorsFromImages(inputPath, outputPath, textBoxes,
+                       backgroundMaskDir = None, multipleImages = "no"):
     
     """ This function extract text from an image using detectTextBoxes function
         By giving the path where images are located it will store the detected text
@@ -98,89 +102,80 @@ def getTextDescriptorsFromImages(inputPath, outputPath,pny_OR_txt,createPKL):
     ----------
     inputPath : path where images files are located
     outputPath : path where NPY files will be stored
-    txt_OR_pny  : Boolean value to select how the data wil be saved 
-                    True=  pny files   False= txt files
-    Returns
+    textBoxes  : list of list of list of detected boxes 
+    backgroundMaskDir : background mask direction, if there is no background values should be None
+    multipleImages: "yes" if the image can have more than one painting, otherwise "no"
     -------
-    resultsFromBBoxes : All data in 1 vector
     """
-    resultsFromBBoxes = []
-    BBox=detectTextBoxes(inputPath,outputPath,createPKL, numberOfFile=2)
+    
     # Iterate files
-    i=0
     for file in os.listdir(inputPath):
         if file[-4:] == ".jpg":
             
+            imageNum = int(file[:-4].split("_")[-1])
             # Read image
-            img = cv2.imread(inputPath + file)
-            # Extract text from image BBoxs
-            text=extractTextOnce(img,BBox[i][0])
-            # Erase n/ char
-            textFinal=str.strip(text)
-            resultsFromBBoxes.append(textFinal)
-            # save in a PNY file
-            if pny_OR_txt :
-                np.save(outputPath + file[:-4] + ".npy"  ,textFinal)
-     
+            image = cv2.imread(inputPath + file)
+            
+            # Get mask
+            if backgroundMaskDir is None:
+                # Take into account every pixel
+                mask = np.zeros(image.shape[:2], dtype = np.uint8) + 255
             else:
-                file2save= open(outputPath + file[:-4] + ".txt",'w') 
-                file2save.write(textFinal)
-                file2save.close()
-            
-            
-            
-            
-            
-            i=i+1
-    return resultsFromBBoxes
+                mask = cv2.imread(backgroundMaskDir + file[:-4] + ".png", cv2.IMREAD_GRAYSCALE)
 
-def getTextDescriptorsFomTxtFiles(inputPath,outputPath,pny_OR_txt):
-    """ This function extract painting name from the strings stored in .txt files and store them in PNY 
+            
+            if multipleImages != "no":
+                
+                boxes = getBiggestContours(mask)
+                # Empty mask
+                mask = np.zeros(image.shape[:2], dtype = np.uint8) + 255
+            
+            for i, box in enumerate(boxes):
+                xMinP, yMinP, xMaxP, yMaxP = box
+                
+                paintingNew =  image[yMinP: yMaxP + 1, xMinP: xMaxP + 1]
+                    
+                # Extract text from image BBoxs
+                text=extractTextOnce(paintingNew,textBoxes[imageNum][i])
+                # Erase n/ char
+                textFinal=str.strip(text)
+                
+                descriptorPath = outputPath + file[:-4] + "_" + str(i) + ".npy"
+                np.save(descriptorPath, textFinal)
+                
+
+def computeTextDescriptorsFomTxtFiles(inputPath,outputPath):
+    """ This function extract painting name from the strings stored in .txt files and store them in NPY 
     Parameters
     ----------
     inputPath : string where .txt files are located
     outputPath : string where NPY files will be stored
-    txt_OR_pny  : Boolean value to select how the data wil be saved 
-                    True=  pny files   False= txt files
-    Returns
     -------
-    resultsFromFiles : All data in 1 vector
     """
-    resultsFromFiles = []
+    
+    
     # Iterate files
-    i=0
-        # Extract text from .txt files
     for file_text in os.listdir(inputPath):
         if file_text[-4:] == ".txt":
             # Extract paitning name
             #textFiles_Paintname= getPaintName(inputPath+file_text)
+            
             # Extract painter name
             textFiles_Paintername= getPainterName(inputPath+file_text)
-            # Save as descriptors
-
-            resultsFromFiles.append(textFiles_Paintername)
-            if pny_OR_txt :
-                np.save(outputPath + file_text[:-4] + ".npy"  ,textFiles_Paintername)
-     
-            else:
-                file2save= open(outputPath + file_text[:-4] + ".txt",'w') 
-                file2save.write(textFiles_Paintername)
-                file2save.close()
-
             
-            i=i+1
-    #print(resultsFromFiles)
-    return resultsFromFiles
+            # Save as descriptors
+            np.save(outputPath + file_text[:-4] + ".npy"  ,textFiles_Paintername)
+     
 
 
 
 
 
 def loadNPY(inputPath):
-    """ This function reads all PNY files inside a folder and prints them 
+    """ This function reads all NPY files inside a folder and prints them 
     Parameters
     ----------
-    inputPath : string where pny are located
+    inputPath : string where npy are located
 
     Returns
     -------
@@ -206,7 +201,7 @@ def loadNPY(inputPath):
 
 
 
-def saveBestKmatches(bbddDescriptorsPath, qDescriptorsPath,pny_OR_txt, k, distanceFunc):
+def saveBestKmatches(bbddDescriptorsPath, qDescriptorsPath,npy_OR_txt, k, distanceFunc):
     """ This function computes all the similarities between the database and query images
         using the distance function given and returns k best matches for every query image
     
@@ -273,6 +268,7 @@ def saveBestKmatches(bbddDescriptorsPath, qDescriptorsPath,pny_OR_txt, k, distan
     
     return result
 
+"""
 outputPath_qsd1 = './textDescriptors/qsd1_w2/'
 outputPath_BBDD = './textDescriptors/BBDD/'
 inputPath_qsd1 = './denoisedImages/optimized/qsd1_w3/'
@@ -280,18 +276,9 @@ inputPath_BBDD = '../../WEEK1/BBDD/'
 gt_results = "../../WEEK3/qsd1_w3/"+"gt_corresps.pkl"
 
 
-
-
-
-
-
-
-
-
-
 # Calculate descriptors
-#getTextDescriptorsFomTxtFiles(inputPath_BBDD,outputPath_BBDD)
-#getTextDescriptorsFromImages(inputPath_qsd1, outputPath_qsd1,False)
+#computeTextDescriptorsFomTxtFiles(inputPath_BBDD,outputPath_BBDD)
+#computeTextDescriptorsFromImages(inputPath_qsd1, outputPath_qsd1,False)
 
 # Compute matches
 for i in range(1,36):
@@ -313,3 +300,4 @@ for i in range(1,36):
 
 
 #cv2.waitKey(27)
+"""
