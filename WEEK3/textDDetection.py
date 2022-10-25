@@ -92,7 +92,7 @@ def detectText(image):
         maxX = min(image.shape[1] - 1, maxX + diffX)
         
         
-        diffY = int((maxY - minY)*0.30)
+        diffY = int((maxY - minY)*0.3)
         minY = max(0, minY-diffY)
         maxY = min(image.shape[0] - 1, maxY + diffY)
     

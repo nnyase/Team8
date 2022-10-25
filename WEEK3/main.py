@@ -19,9 +19,9 @@ def parse_args():
     parser.add_argument('-dDir', '--descriptor_dir', type=str, default = "./descriptors/", help='Path where descriptors will be saved')
     parser.add_argument('-dColor', '--color_des', type=str, default = "no", help='Indicate if color descriptor has to be used')
     parser.add_argument('-dTexture', '--texture_des', type=str, default = "no", help='Indicate if texture descriptor has to be used')
-    parser.add_argument('-numFeatures', '--num_features', type=str, default = "<>", help='Number of features for each block')
-    parser.add_argument('-iLvlTexture', '--levels_texture', type=str, default = "<0>", help='Number of levels for multiresolution in texture descriptors')
-    parser.add_argument('-tType', '--texture_type', type=str, default = "all", help='Texture type used to compute descriptors')
+    parser.add_argument('-numFeatures', '--num_features', type=str, default = "<160>", help='Number of features for each block')
+    parser.add_argument('-iLvlTexture', '--levels_texture', type=str, default = "<3>", help='Number of levels for multiresolution in texture descriptors')
+    parser.add_argument('-tType', '--texture_type', type=str, default = "hog", help='Texture type used to compute descriptors')
     parser.add_argument('-tBox', '--text_boxes', default = "no", type = str, help='Indicate if text boxes has to be detected')
     parser.add_argument('-tBoxDir', '--text_boxes_dir', default = "./textBoxes/", type = str, help='Path where detected text boxes will be saved')
     parser.add_argument('-rDir', '--results_dir', type=str, default = "./results/", help='Path where retrieval results will be saved')
@@ -47,8 +47,8 @@ def genAndStoreBackgroundMasks(background_func, mask_dir, query_dir, queryName):
 
     
         # Generate masks
-        generateBackgroundMasks(query_dir, folderPath, background_func)
-        print("Masks generated!")
+    generateBackgroundMasks(query_dir, folderPath, background_func)
+    print("Masks generated!")
     
     maskFolder = folderPath
 

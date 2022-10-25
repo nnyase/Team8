@@ -7,7 +7,7 @@ from utils.distanceTextMetrics import getDistance2Strings
 import textdistance
 from textDDetection import detectTextBoxes
 from mapk import mapkL
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+pytesseract.pytesseract.tesseract_cmd = r'C:/Users/inigo/anaconda3/envs/py38/Library/bin/tesseract.exe'
 
 '''
                 This script contains three main functions :
@@ -47,7 +47,7 @@ def getPaintName(inputPath):
     l = len(content1)
     
     if l ==2:
-        final=content1[1]
+        final=content1[2]
         lfinal=len(final)
         final = final[:lfinal-2]
         final = final[2:]
@@ -73,25 +73,20 @@ def getPainterName(inputPath):
     """
     my_file = open(inputPath,"r")
     content = my_file. read()
-    l = len(content)
-    lastL = content[:l-2]
-    firstL = lastL[0:]
-    line = firstL.split(",")
+   
+    line = content.split(",")
     painterTemp=line[0]
-    pnl= len(painterTemp)
-    if len(line) == 3:
-        painterName=painterTemp[:pnl]
-    else:
-        painterName=painterTemp[:pnl-1]
-    painterName=painterName[2:]
+    painterName = painterTemp[2:-1]
     
     my_file. close()
     return painterName
 def extractTextOnce(img,BBox):
     
     roi = img[BBox[1]:BBox[3],BBox[0]:BBox[2]]
+    #roi = cv2.cvtColor(roi,cv2.COLOR_BGR2GRAY)
+    #_, roiT = cv2.threshold(roi, 128, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     text = pytesseract.image_to_string(roi)
-   # print(text)
+    #print(text)
     return text
 
 def getTextDescriptorsFromImages(inputPath, outputPath,pny_OR_txt,createPKL):
@@ -124,6 +119,7 @@ def getTextDescriptorsFromImages(inputPath, outputPath,pny_OR_txt,createPKL):
             textFinal=str.strip(text)
             resultsFromBBoxes.append(textFinal)
             # save in a PNY file
+<<<<<<< Updated upstream
             if pny_OR_txt :
                 np.save(outputPath + file[:-4] + ".npy"  ,textFinal)
      
@@ -136,6 +132,9 @@ def getTextDescriptorsFromImages(inputPath, outputPath,pny_OR_txt,createPKL):
             
             
             
+=======
+            np.save(outputPath + file[:-4] + "_0.npy", textFinal)
+>>>>>>> Stashed changes
             i=i+1
     return resultsFromBBoxes
 
@@ -158,10 +157,11 @@ def getTextDescriptorsFomTxtFiles(inputPath,outputPath,pny_OR_txt):
     for file_text in os.listdir(inputPath):
         if file_text[-4:] == ".txt":
             # Extract paitning name
-            textFiles_Paintname= getPaintName(inputPath+file_text)
+            #textFiles_Paintname= getPaintName(inputPath+file_text)
             # Extract painter name
-            #textFiles_Paintername= getPainterName(inputPath+file_text)
+            textFiles_Paintername= getPainterName(inputPath+file_text)
             # Save as descriptors
+<<<<<<< Updated upstream
             resultsFromFiles.append(textFiles_Paintname)
             if pny_OR_txt :
                 np.save(outputPath + file_text[:-4] + ".npy"  ,textFiles_Paintname)
@@ -170,6 +170,10 @@ def getTextDescriptorsFomTxtFiles(inputPath,outputPath,pny_OR_txt):
                 file2save= open(outputPath + file_text[:-4] + ".txt",'w') 
                 file2save.write(textFiles_Paintname)
                 file2save.close()
+=======
+            np.save(outputPath + file_text[:-4] + ".npy"  ,textFiles_Paintername)#textFiles_Paintname)
+            resultsFromFiles.append(textFiles_Paintername)#textFiles_Paintname)
+>>>>>>> Stashed changes
             
             i=i+1
     #print(resultsFromFiles)
@@ -257,9 +261,15 @@ def saveBestKmatches(bbddDescriptorsPath, qDescriptorsPath,pny_OR_txt, k, distan
             descriptors_DDBB_Path = bbddDescriptorsPath + fileBBDD
             str2=np.load(descriptors_DDBB_Path)
            
+<<<<<<< Updated upstream
             # Calculate distance, 
             str11=np.array2string(str1)
             str22=np.array2string(str2)
+=======
+            # Calculate distance, if empty add an empty string
+            str11=str(str1)
+            str22=str(str2)
+>>>>>>> Stashed changes
             distance = getDistance2Strings(str11,str22,distanceFunc)
             # Save distance
             distances[j] = distance
@@ -274,6 +284,7 @@ def saveBestKmatches(bbddDescriptorsPath, qDescriptorsPath,pny_OR_txt, k, distan
             result[-1].append(sortedIndexes[:k].tolist())
     
     return result
+<<<<<<< Updated upstream
 
 
 
@@ -318,4 +329,44 @@ gt_results = inputPath_qsd1+"gt_corresps.pkl"
 #     print(str(mapkValue)+" Num:"+str(j))
 #     j=j+1
     
+=======
+outputPath_qsd1 = './textDescriptors/qsd1_w2/'
+outputPath_BBDD = './textDescriptors/BBDD/'
+inputPath_qsd1 = './denoisedImages/optimized/qsd1_w3/'
+inputPath_BBDD = '../../WEEK1/BBDD/'
+gt_results = "../../WEEK3/qsd1_w3/"+"gt_corresps.pkl"
+
+
+
+
+
+
+
+
+
+
+
+# Calculate descriptors
+#getTextDescriptorsFomTxtFiles(inputPath_BBDD,outputPath_BBDD)
+#getTextDescriptorsFromImages(inputPath_qsd1, outputPath_qsd1,False)
+
+# Compute matches
+for i in range(1,36):
+    print("Distance function: ", i)
+    predictedResults=saveBestKmatches(outputPath_BBDD, outputPath_qsd1, 10, i)#6)
+    gtResults = read_pkl(gt_results)
+    # print("GT:")
+    # print(gtResults)
+    # print("----------------------------------")
+    # print("Best K matches")
+    # print(predictedResults)
+    
+    # Evaluate results
+    mapkValue = mapkL(gtResults, predictedResults, 1)
+    print(mapkValue)
+    mapkValue = mapkL(gtResults, predictedResults, 5)
+    print(mapkValue)
+    #print(results)
+
+>>>>>>> Stashed changes
 #cv2.waitKey(27)
