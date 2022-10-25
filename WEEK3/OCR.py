@@ -119,7 +119,6 @@ def getTextDescriptorsFromImages(inputPath, outputPath,pny_OR_txt,createPKL):
             textFinal=str.strip(text)
             resultsFromBBoxes.append(textFinal)
             # save in a PNY file
-<<<<<<< Updated upstream
             if pny_OR_txt :
                 np.save(outputPath + file[:-4] + ".npy"  ,textFinal)
      
@@ -132,9 +131,6 @@ def getTextDescriptorsFromImages(inputPath, outputPath,pny_OR_txt,createPKL):
             
             
             
-=======
-            np.save(outputPath + file[:-4] + "_0.npy", textFinal)
->>>>>>> Stashed changes
             i=i+1
     return resultsFromBBoxes
 
@@ -161,19 +157,16 @@ def getTextDescriptorsFomTxtFiles(inputPath,outputPath,pny_OR_txt):
             # Extract painter name
             textFiles_Paintername= getPainterName(inputPath+file_text)
             # Save as descriptors
-<<<<<<< Updated upstream
-            resultsFromFiles.append(textFiles_Paintname)
+
+            resultsFromFiles.append(textFiles_Paintername)
             if pny_OR_txt :
-                np.save(outputPath + file_text[:-4] + ".npy"  ,textFiles_Paintname)
+                np.save(outputPath + file_text[:-4] + ".npy"  ,textFiles_Paintername)
      
             else:
                 file2save= open(outputPath + file_text[:-4] + ".txt",'w') 
-                file2save.write(textFiles_Paintname)
+                file2save.write(textFiles_Paintername)
                 file2save.close()
-=======
-            np.save(outputPath + file_text[:-4] + ".npy"  ,textFiles_Paintername)#textFiles_Paintname)
-            resultsFromFiles.append(textFiles_Paintername)#textFiles_Paintname)
->>>>>>> Stashed changes
+
             
             i=i+1
     #print(resultsFromFiles)
@@ -261,15 +254,10 @@ def saveBestKmatches(bbddDescriptorsPath, qDescriptorsPath,pny_OR_txt, k, distan
             descriptors_DDBB_Path = bbddDescriptorsPath + fileBBDD
             str2=np.load(descriptors_DDBB_Path)
            
-<<<<<<< Updated upstream
-            # Calculate distance, 
-            str11=np.array2string(str1)
-            str22=np.array2string(str2)
-=======
             # Calculate distance, if empty add an empty string
             str11=str(str1)
             str22=str(str2)
->>>>>>> Stashed changes
+
             distance = getDistance2Strings(str11,str22,distanceFunc)
             # Save distance
             distances[j] = distance
@@ -284,52 +272,7 @@ def saveBestKmatches(bbddDescriptorsPath, qDescriptorsPath,pny_OR_txt, k, distan
             result[-1].append(sortedIndexes[:k].tolist())
     
     return result
-<<<<<<< Updated upstream
 
-
-
-
-outputPath_qsd1_pny = './textDescriptors/notDenoisedImages/qsd1_w2_pny/'
-outputPath_BBDD_pny = './textDescriptors/BBDD_pny/'
-outputPath_qsd1_txt = './textDescriptors/qsd1_w2_txt/'
-outputPath_BBDD_txt = './textDescriptors/BBDD_txt/'
-inputPath_qsd1 = './qsd1_w2/'
-inputPath_BBDD = './BBDD/'
-
-inputPath_source = './denoisedImages/gaussian /qsd1_w3/'
-outputPath_results = './textDescriptors/denoisedImages/nlmean/qsd1_w3_npy/'
-
-
-
-
-gt_results = inputPath_qsd1+"gt_corresps.pkl"
-
-
-
-# gtResults = read_pkl(gt_results)
-
-#predictedResults=saveBestKmatches(outputPath_BBDD_txt, outputPath_qsd1_txt,True, 1, 3)
-
-# print("GT:")
-# print(gtResults)
-# print("----------------------------------")
-# print("Best K matches")
-# print(predictedResults)
-# mapkValue = mapkL(gtResults, predictedResults, 10)
-# print(mapkValue)
-# print(results)
-# getTextDescriptorsFomTxtFiles(inputPath_BBDD,outputPath_BBDD,False)
-#results=getTextDescriptorsFromImages(inputPath_source, outputPath_results,True,False)
-#results1=loadNPY(outputPath_results)
-#print(results)
-# j=0
-# for i in range(35):
-#     predictedResults=saveBestKmatches(outputPath_BBDD_pny, outputPath_qsd1_pny,False, 5, j)
-#     mapkValue = mapkL(gtResults, predictedResults, 5)
-#     print(str(mapkValue)+" Num:"+str(j))
-#     j=j+1
-    
-=======
 outputPath_qsd1 = './textDescriptors/qsd1_w2/'
 outputPath_BBDD = './textDescriptors/BBDD/'
 inputPath_qsd1 = './denoisedImages/optimized/qsd1_w3/'
@@ -368,5 +311,5 @@ for i in range(1,36):
     print(mapkValue)
     #print(results)
 
->>>>>>> Stashed changes
+
 #cv2.waitKey(27)
