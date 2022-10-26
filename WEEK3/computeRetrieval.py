@@ -2,6 +2,9 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt #importing matplotlib
 import os
+from mapk import mapkL
+from utils.managePKLfiles import read_pkl
+from utils.distanceTextMetrics import getDistance2Strings
 from utils.distanceMetrics import EuclidianDistance, L1_Distance, X2_Distance, Hellinger_distance, Cosine_Similarity
 
 
@@ -28,6 +31,32 @@ def SimilarityFromDescriptors(path1,path2,activatePlot , distanceFunction):
         plt.show()
     
     return distance
+
+###############################################################################
+# By givin two texts contained in npy file paths to the def SimilarityFromText#
+# It'll calculate the similarity using hamming, mlipns, levenshtein, etc.     #
+# then a graph will be displayed showing                                      #
+# both histograms (if the last parameter is activated) and will print the     #
+# values on the console                                                        #
+############################################################################### 
+
+def SimilarityFromText(path1,path2,activatePlot , distanceFunction):
+    # Load descriptors
+    DDBB = np.load(path1)
+    Q1   = np.load(path2) 
+    
+    # DistanceFunction is an integer
+    
+    # Calculate distance
+    distance = getDistance2Strings(str(DDBB), str(Q1), distanceFunction)
+    
+    if activatePlot:      
+        plt.plot(DDBB)
+        plt.plot(Q1)
+        plt.show()
+    
+    return distance
+
 
 ##################################################################################
 # The same that  SimilarityFromDescriptors but builds the concatenated histogram #
@@ -235,9 +264,12 @@ def saveBestKmatchesOld(bbddDescriptorsPath, qDescriptorsPath, k, distanceFunc):
 
 
 
+# BBDDPathColor = 'WEEK3/descriptors/BBDD/cielab/level_3/2D_bins_20/'
+# QPathColor = 'WEEK3/descriptors/qsd1_w3/cielab/level_3/2D_bins_20/'
 
-
-
+# result = saveBestKmatches(BBDDPathColor, QPathColor, 10, 'l1')
+# gtResults = read_pkl('WEEK3/data/qsd1_w3/gt_corresps.pkl')
+# print(mapkL(gtResults, result, 10))
 
 
 
