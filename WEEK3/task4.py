@@ -60,13 +60,13 @@ def saveBestKmatchesNew(bbddDescriptorsPathText = None, bbddDescriptorsPathColor
     result = []
     
     # For every image in query
-    for i, fileQ in enumerate(os.listdir(qDescriptorsPath)):
+    for i, fileQ in enumerate(sorted(os.listdir(qDescriptorsPath))):
         
         # Create list of distances
         distances = np.array([-1.]*numBBDD)
         
         # For every image in BBDD
-        for j, fileBBDD in enumerate(os.listdir(bbddDescriptorsPath)):
+        for j, fileBBDD in enumerate(sorted(os.listdir(bbddDescriptorsPath))):
 
             # Mean weighted distance
             distance = 0
@@ -76,14 +76,17 @@ def saveBestKmatchesNew(bbddDescriptorsPathText = None, bbddDescriptorsPathColor
                 distanceText = SimilarityFromText(qDescriptorsPathText + fileQ,
                                                 bbddDescriptorsPathText + fileBBDD,False, distanceFuncText)
                 distance += weightText*distanceText
+                # Distance for text descriptors is in [0,1]
             if distanceFuncColor != None:
                 distanceColor = SimilarityFromDescriptors(qDescriptorsPathColor + fileQ,
                                                 bbddDescriptorsPathColor + fileBBDD,False, distanceFuncColor)
-                distance += weightColor*distanceColor
+                # Distance for color descriptors is in [0,2]
+                distance += weightColor*(distanceColor/2)
             if distanceFuncTexture != None:
                 distanceTexture = SimilarityFromDescriptors(qDescriptorsPathTexture + fileQ,
                                                 bbddDescriptorsPathTexture + fileBBDD,False, distanceFuncTexture)
-                distance += weightTexture*distanceTexture
+                # Distance for texture descriptors is in [0,2]
+                distance += weightTexture*(distanceTexture/2)
 
             # Save distance
             distances[j] = distance
@@ -133,10 +136,11 @@ def bestCoefficient(bbddDescriptorsPathText = None, bbddDescriptorsPathColor = N
 
     """
 
-    gtResults = read_pkl('WEEK3/data/qsd1_w3/gt_corresps.pkl')
+    gtResults = read_pkl('./data/qsd1_w3/gt_corresps.pkl')
     best = 0
     besti = 0
     bestj = 0
+    bestl = 0
 
     #2 descriptors
     if(bbddDescriptorsPathText != None and bbddDescriptorsPathColor != None and bbddDescriptorsPathTexture == None 
@@ -145,48 +149,104 @@ def bestCoefficient(bbddDescriptorsPathText = None, bbddDescriptorsPathColor = N
 
         #Text and Color
         if(bbddDescriptorsPathText != None and bbddDescriptorsPathColor != None):
-            for i in range(4):
-                for j in range(4) :
-                    if not (i == 0 and j == 0):
+            for i in [1/4,1/3,1,3,4]:
 
-                        predictedResults = saveBestKmatchesNew(bbddDescriptorsPathText = bbddDescriptorsPathText, bbddDescriptorsPathColor = bbddDescriptorsPathColor,
-                        qDescriptorsPathText = qDescriptorsPathText, qDescriptorsPathColor = qDescriptorsPathColor, distanceFuncText = distanceFuncText, distanceFuncColor = distanceFuncColor, k = k, weightText = i, weightColor = j)
+                    predictedResults = saveBestKmatchesNew(bbddDescriptorsPathText = bbddDescriptorsPathText, bbddDescriptorsPathColor = bbddDescriptorsPathColor,
+                    qDescriptorsPathText = qDescriptorsPathText, qDescriptorsPathColor = qDescriptorsPathColor, distanceFuncText = distanceFuncText, distanceFuncColor = distanceFuncColor, k = k, weightText = i)
+
+                    mapkl = mapkL(gtResults, predictedResults, 10)
+
+                    print(round(mapkl,2))
+
+                    if(best < mapkl):
+                        besti = i
+                        best = mapkl
+
+            print("Best combination for color and text is : weightText = " + str(besti) + " and weightColor = 1 =====> " + str(best))
+
+        #Text and Texture
+        if(bbddDescriptorsPathText != None and bbddDescriptorsPathTexture != None):
+            for i in [1/4,1/3,1,3,4]:
+                
+                    predictedResults = saveBestKmatchesNew(bbddDescriptorsPathText = bbddDescriptorsPathText, bbddDescriptorsPathTexture = bbddDescriptorsPathTexture,
+                    qDescriptorsPathText = qDescriptorsPathText, qDescriptorsPathTexture = qDescriptorsPathTexture, distanceFuncText = distanceFuncText, distanceFuncTexture = distanceFuncTexture, k = k, weightText = i)
+
+                    mapkl = mapkL(gtResults, predictedResults, 10)
+
+                    print(round(mapkl,2))
+
+                    if(best < mapkl):
+                        besti = i
+                        best = mapkl
+
+            print("Best combination for text and texture is : weightText = " + str(besti) + " and weightTexture = 1 =====> " + str(best))
+
+        #Text and Texture
+        if(bbddDescriptorsPathColor != None and bbddDescriptorsPathTexture != None):
+            for i in [1/4,1/3,1,3,4]:
+                
+                    predictedResults = saveBestKmatchesNew(bbddDescriptorsPathColor = bbddDescriptorsPathColor, bbddDescriptorsPathTexture = bbddDescriptorsPathTexture,
+                    qDescriptorsPathColor = qDescriptorsPathColor, qDescriptorsPathTexture = qDescriptorsPathTexture, distanceFuncColor = distanceFuncColor, distanceFuncTexture = distanceFuncTexture, k = k, weightColor = i)
+
+                    mapkl = mapkL(gtResults, predictedResults, 10)
+
+                    print(round(mapkl,2))
+
+                    if(best < mapkl):
+                        besti = i
+                        best = mapkl
+
+            print("Best combination for color and texture is : weightColor = " + str(besti) + " and weightTexture = 1 =====> " + str(best))
+
+
+    #3 descriptors
+
+    if(bbddDescriptorsPathText != None and bbddDescriptorsPathColor != None and bbddDescriptorsPathTexture != None):
+
+            for i in [1/5,1/4,1/2,3/4]:
+                for j in [1/5,1/4,1/2,3/4]:
+                    for l in [1/5,1/4,1/2,3/4]:
+                
+                        predictedResults = saveBestKmatchesNew(bbddDescriptorsPathColor = bbddDescriptorsPathColor, bbddDescriptorsPathTexture = bbddDescriptorsPathTexture,
+                        bbddDescriptorsPathText = bbddDescriptorsPathText, qDescriptorsPathColor = qDescriptorsPathColor,
+                        qDescriptorsPathTexture = qDescriptorsPathTexture, qDescriptorsPathText= qDescriptorsPathText, distanceFuncColor = distanceFuncColor, 
+                        distanceFuncTexture = distanceFuncTexture, distanceFuncText= distanceFuncText, k = k, weightColor = i, weightTexture= j, weightText= l)
 
                         mapkl = mapkL(gtResults, predictedResults, 10)
 
-                        print(mapkl)
+                        print('(' + str(i) + ',' + str(j) + ',' + str(l) + ') => ' + str(round(mapkl,2)))
 
                         if(best < mapkl):
                             besti = i
                             bestj = j
+                            bestl = l
                             best = mapkl
 
-        print("Best combination for color and text is : weightText = " + str(besti) + " and weightColor = " + str(bestj) + " =====> " + str(best))
+            print("Best combination for color, texture and text is : weightColor = " + str(besti) + ", weightTexture = " + str(bestj) + " and weightText = " + str(bestl) + " =====> " + str(best))
+
+       
 
 
+# Hog descriptors
+BBDDPathTexture = './descriptors/BBDD/hog/levels_3/features_160/'
+QPathTexture = './descriptors/qsd1_w3/hog/levels_3/features_160/'
+
+# Text descriptors
+BBDDPathText = './textDescriptors/BBDD_pny/'
+QPathText = './textDescriptors/denoisedImages/nlmean/qsd1_w3_npy/'
+
+# Color descriptors
+BBDDPathColor = './descriptors/BBDD/cielab/level_3/2D_bins_20/'
+QPathColor = './descriptors/qsd1_w3/cielab/level_3/2D_bins_20/'
 
 
+# result = saveBestKmatchesNew(bbddDescriptorsPathTexture = BBDDPathTexture,
+#     qDescriptorsPathTexture = QPathTexture, distanceFuncTexture= L1_Distance)
 
-# # Hog descriptors
-# BBDDPathTexture = 'WEEK3/descriptors/BBDD/hog/levels_3/features_160/'
-# QPathTexture = 'WEEK3/descriptors/qsd1_w3/hog/levels_3/features_160/'
-
-# # Text descriptors
-# BBDDPathText = 'WEEK3/textDescriptors/BBDD_pny/'
-# QPathText = 'WEEK3/textDescriptors/denoisedImages/nlmean/qsd1_w3_npy/'
-
-# # Color descriptors
-# BBDDPathColor = 'WEEK3/descriptors/BBDD/cielab/level_3/2D_bins_20/'
-# QPathColor = 'WEEK3/descriptors/qsd1_w3/cielab/level_3/2D_bins_20/'
-
-
-# result = saveBestKmatchesNew(bbddDescriptorsPathColor = BBDDPathColor,
-#     qDescriptorsPathColor = QPathColor, distanceFuncColor= L1_Distance)
-
-# gtResults = read_pkl('WEEK3/data/qsd1_w3/gt_corresps.pkl')
-# predictedResults = read_pkl('WEEK3/results/qsd1_w3/cielab_l1/level_3/2D_bins_20/result.pkl')
+# gtResults = read_pkl('./data/qsd1_w3/gt_corresps.pkl')
 # print(mapkL(gtResults, result, 10))
 
-# bestCoefficient(bbddDescriptorsPathColor=BBDDPathColor, bbddDescriptorsPathText=BBDDPathText, qDescriptorsPathColor=QPathColor,
-# qDescriptorsPathText=QPathText)
+# bestCoefficient(bbddDescriptorsPathColor=BBDDPathColor, bbddDescriptorsPathText=BBDDPathText,
+# bbddDescriptorsPathTexture= BBDDPathTexture, qDescriptorsPathColor=QPathColor,
+# qDescriptorsPathText=QPathText, qDescriptorsPathTexture= QPathTexture)
 

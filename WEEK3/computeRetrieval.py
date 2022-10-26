@@ -152,9 +152,9 @@ def saveBestKmatches(bbddDescriptorsPath, qDescriptorsPath, k, distanceFunc):
         
     # Init result list
     result = []
-    
+
     # For every image in query
-    for i, fileQ in enumerate(os.listdir(qDescriptorsPath)):
+    for i, fileQ in enumerate(sorted(os.listdir(qDescriptorsPath))):
         
         # Get descriptor path
         descriptors_Q1_Path = qDescriptorsPath + fileQ
@@ -163,7 +163,7 @@ def saveBestKmatches(bbddDescriptorsPath, qDescriptorsPath, k, distanceFunc):
         distances = np.array([-1.]*numBBDD)
         
         # For every image in BBDD
-        for j, fileBBDD in enumerate(os.listdir(bbddDescriptorsPath)):
+        for j, fileBBDD in enumerate(sorted(os.listdir(bbddDescriptorsPath))):
             
             # Get descriptor path
             descriptors_DDBB_Path = bbddDescriptorsPath + fileBBDD
@@ -230,10 +230,9 @@ def saveBestKmatchesOld(bbddDescriptorsPath, qDescriptorsPath, k, distanceFunc):
         distanceFunc = Hellinger_distance
     elif distanceFunc == "cosSim":
         distanceFunc = Cosine_Similarity
-        
-    
+
     # For every image in query
-    for i, fileQ in enumerate(os.listdir(qDescriptorsPath)):
+    for i, fileQ in enumerate(sorted(os.listdir(qDescriptorsPath))):
         
         # Get descriptor path
         descriptors_Q1_Path = qDescriptorsPath + fileQ
@@ -242,8 +241,9 @@ def saveBestKmatchesOld(bbddDescriptorsPath, qDescriptorsPath, k, distanceFunc):
         distances = np.array([-1.]*numBBDD)
         
         # For every image in BBDD
-        for j, fileBBDD in enumerate(os.listdir(bbddDescriptorsPath)):
+        for j, fileBBDD in enumerate(sorted(os.listdir(bbddDescriptorsPath))):
             
+
             # Get descriptor path
             descriptors_DDBB_Path = bbddDescriptorsPath + fileBBDD
             
@@ -263,13 +263,6 @@ def saveBestKmatchesOld(bbddDescriptorsPath, qDescriptorsPath, k, distanceFunc):
     return result
 
 
-
-# BBDDPathColor = 'WEEK3/descriptors/BBDD/cielab/level_3/2D_bins_20/'
-# QPathColor = 'WEEK3/descriptors/qsd1_w3/cielab/level_3/2D_bins_20/'
-
-# result = saveBestKmatches(BBDDPathColor, QPathColor, 10, 'l1')
-# gtResults = read_pkl('WEEK3/data/qsd1_w3/gt_corresps.pkl')
-# print(mapkL(gtResults, result, 10))
 
 
 
