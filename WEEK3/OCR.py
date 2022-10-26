@@ -88,7 +88,11 @@ def extractTextOnce(img,BBox):
     roi = img[BBox[1]:BBox[3],BBox[0]:BBox[2]]
     #roi = cv2.cvtColor(roi,cv2.COLOR_BGR2GRAY)
     #_, roiT = cv2.threshold(roi, 128, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    text = pytesseract.image_to_string(roi)
+    try:
+        text = pytesseract.image_to_string(roi)
+    except:
+        text = ""
+        
     #print(text)
     return text
 
@@ -127,16 +131,25 @@ def computeTextDescriptorsFromImages(inputPath, outputPath, textBoxes,
             if multipleImages != "no":
                 
                 boxes = getBiggestContours(mask)
-                # Empty mask
-                mask = np.zeros(image.shape[:2], dtype = np.uint8) + 255
+            
+            else:
+                boxes = [(0,0,image.shape[1]-1, image.shape[0]-1)]
             
             for i, box in enumerate(boxes):
                 xMinP, yMinP, xMaxP, yMaxP = box
                 
+                # Get text box of the painting coordinates
+                textBox = textBoxes[imageNum][i]
+                
+                textBox[0] -= xMinP
+                textBox[2] -= xMinP
+                textBox[1] -= yMinP
+                textBox[3] -= yMinP
+                
                 paintingNew =  image[yMinP: yMaxP + 1, xMinP: xMaxP + 1]
                     
                 # Extract text from image BBoxs
-                text=extractTextOnce(paintingNew,textBoxes[imageNum][i])
+                text=extractTextOnce(paintingNew,textBox)
                 # Erase n/ char
                 textFinal=str.strip(text)
                 
@@ -144,7 +157,7 @@ def computeTextDescriptorsFromImages(inputPath, outputPath, textBoxes,
                 np.save(descriptorPath, textFinal)
                 
 
-def computeTextDescriptorsFomTxtFiles(inputPath,outputPath):
+def computeTextDescriptorsFromTxtFiles(inputPath,outputPath):
     """ This function extract painting name from the strings stored in .txt files and store them in NPY 
     Parameters
     ----------
@@ -164,7 +177,7 @@ def computeTextDescriptorsFomTxtFiles(inputPath,outputPath):
             textFiles_Paintername= getPainterName(inputPath+file_text)
             
             # Save as descriptors
-            np.save(outputPath + file_text[:-4] + ".npy"  ,textFiles_Paintername)
+            np.save(outputPath + file_text[:-4] + "_0.npy"  ,textFiles_Paintername)
      
 
 

@@ -75,6 +75,9 @@ def generateMultiResDescriptors(image, mask, levels, histGenFunc, bins):
             
             actualH = actualH + roiH 
         
+        if np.sum(levelHistogram) == 0:
+            levelHistogram[0] = 1
+        
         levelHistogram = levelHistogram / np.sum(levelHistogram)
         resultHistogram = np.concatenate([resultHistogram, levelHistogram * weight])
     

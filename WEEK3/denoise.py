@@ -99,6 +99,42 @@ def optimizedDenoising(img):
         return img.copy()
 
 
+def denoiseImages(queryDir, outputDir, method):
+    """
+    This functions denoises and stores in the output path the images in the given input path using the selected method
+
+    Parameters
+    ----------
+    queryDir : str
+        Input path where noisy images are.
+    outputDir : str
+        Output path where denoised images will be saved.
+    method : str
+        Method to use to denoise images.
+
+    Returns
+    -------
+    None.
+
+    """
+    # Read images
+    noisyImagesPath = queryDir +"/*.jpg"
+    noisyImages = [cv2.imread(file) for file in glob.glob(noisyImagesPath)]
+    
+    # Denoise images
+    denoisedImages = denoise_images(noisyImages,method=method)
+    
+    # Save files
+    fileNames = os.listdir(queryDir)
+    jpgFiles =[]
+    for name in fileNames:
+        if name[-4:] == ".jpg":
+            jpgFiles.append(name)
+    
+    for index in range(len(denoisedImages)):
+        cv2.imwrite(outputDir + jpgFiles[index], denoisedImages[index])
+        
+
 
 if __name__ == "__main__":
     args= parse_args()

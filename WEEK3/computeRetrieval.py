@@ -18,6 +18,19 @@ from utils.distanceMetrics import EuclidianDistance, L1_Distance, X2_Distance, H
 #values on the console                                                        #
 ############################################################################### 
 def SimilarityFromDescriptors(path1,path2,activatePlot , distanceFunction):
+    
+    # Get distance function
+    if distanceFunction == "euclidean":
+        distanceFunction = EuclidianDistance
+    elif distanceFunction == "l1":
+        distanceFunction = L1_Distance
+    elif distanceFunction == "x2":
+        distanceFunction = X2_Distance
+    elif distanceFunction == "hellinger":
+        distanceFunction = Hellinger_distance
+    elif distanceFunction == "cosSim":
+        distanceFunction = Cosine_Similarity
+        
     # Load descriptors
     DDBB = np.load(path1)
     Q1   = np.load(path2) 
@@ -262,6 +275,15 @@ def saveBestKmatchesOld(bbddDescriptorsPath, qDescriptorsPath, k, distanceFunc):
     
     return result
 
+
+
+
+# BBDDPathColor = './descriptors/BBDD/cielab/level_3/2D_bins_20/'
+# QPathColor = './descriptors/qsd1_w3/cielab/level_3/2D_bins_20/'
+
+# result = saveBestKmatches(BBDDPathColor, QPathColor, 10, 'l1')
+# gtResults = read_pkl('./data/qsd1_w3/gt_corresps.pkl')
+# print(mapkL(gtResults, result, 10))
 
 
 

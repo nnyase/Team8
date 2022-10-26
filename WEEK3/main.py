@@ -9,15 +9,17 @@ from generateDescriptors import computeColorDescriptors, computeTextureDescripto
 from hist2Doptimized import Create2DHistogram
 from textDetection import detectTextBoxes
 from meanIou import evaluateTextBoxes
-from OCR import computeTextDescriptorsFromImages, computeTextDescriptorsFromTxt
+from OCR import computeTextDescriptorsFromImages, computeTextDescriptorsFromTxtFiles
 from utils.distanceTextMetrics import TEXT_DISTANCE_FUNCS
-
+from task4 import saveBestKmatchesNew
+from denoise import denoiseImages
 
 def parse_args():
     parser = argparse.ArgumentParser(description= 'Descriptor generation')
     parser.add_argument('-bbddDir', '--BBDD_dir', type=str, help='Path of bbdd images')
     parser.add_argument('-qDir', '--query_dir', type=str, help='Path of query images')
     parser.add_argument('-dDir', '--descriptor_dir', type=str, default = "./descriptors/", help='Path where descriptors will be saved')
+    parser.add_argument('-noise', '--noise', type=str, default = "no", help='Indicate if there is noise in images')
     parser.add_argument('-dType', '--des_type', type=str, default = "<color,texture,text>", help='Indicate the descriptor combination')
     parser.add_argument('-tBox', '--text_boxes', default = "no", type = str, help='Indicate if text boxes has to be detected')
     parser.add_argument('-tBoxDir', '--text_boxes_dir', default = "./textBoxes/", type = str, help='Path where detected text boxes will be saved')
@@ -44,8 +46,8 @@ def genAndStoreBackgroundMasks(background_func, mask_dir, query_dir, queryName):
 
     
         # Generate masks
-    generateBackgroundMasks(query_dir, folderPath, background_func)
-    print("Masks generated!")
+        generateBackgroundMasks(query_dir, folderPath, background_func)
+        print("Masks generated!")
     
     maskFolder = folderPath
 
@@ -119,7 +121,6 @@ def genAndStoreTextureDescriptors(textureType, levels, num_features, descriptor_
 def genAndStoreTextDescriptors(descriptor_dir, images_dir, database_name, textBoxes = None,
                            maskFolder = None, background_func = None, multiple_paintings = "no"):
     
-     
     
     # Create folder
     if not(maskFolder is None):
@@ -133,7 +134,7 @@ def genAndStoreTextDescriptors(descriptor_dir, images_dir, database_name, textBo
         os.makedirs(folderPath)
         
         if database_name == "BBDD":
-            computeTextDescriptorsFromTxt(images_dir, folderPath)
+            computeTextDescriptorsFromTxtFiles(images_dir, folderPath)
         else:
             computeTextDescriptorsFromImages(images_dir, folderPath, textBoxes,
                                backgroundMaskDir = maskFolder, 
@@ -141,14 +142,19 @@ def genAndStoreTextDescriptors(descriptor_dir, images_dir, database_name, textBo
         
         print(database_name, " descriptors generated!")
    
-# Function to compute retrieval using the folder management and save the pkl file
+# Function to compute retrieval using the saved descriptors
 def computeRetrieval(args, queryName, des_combination, distance_func_text, distance_func_text_index, distance_func_vector, levels,
                      num_features, texture_type, hist_type, bins_2d, color_space, background_func = None):
     # Output path PKL file
     outputPath = args.results_dir + queryName + "/"
     
-    queryDesP = []
-    bbddDesP = []
+    # Set values to None
+    pathBBDDdescriptorsText = None
+    pathQdescriptorsText = None
+    pathBBDDdescriptorsTexture = None
+    pathQdescriptorsTexture = None
+    pathBBDDdescriptorsColor = None
+    pathQdescriptorsColor = None
     
     for des in des_combination:
         outputPath = outputPath + des + "_"
@@ -157,48 +163,51 @@ def computeRetrieval(args, queryName, des_combination, distance_func_text, dista
         if des == "text":
             outputPath = outputPath + "_" + distance_func_text + "_"
             
-            pathBBDDdescriptors = args.descriptor_dir + "BBDD/text/"
+            pathBBDDdescriptorsText = args.descriptor_dir + "BBDD/text/"
             if args.background_rem != "no": 
-                pathQdescriptors = args.descriptor_dir + queryName + "/text/" + background_func + "/"
+                pathQdescriptorsText = args.descriptor_dir + queryName + "/text/" + background_func + "/"
             else:
-                pathQdescriptors = args.descriptor_dir + queryName + "/text/"
+                pathQdescriptorsText = args.descriptor_dir + queryName + "/text/"
                 
             
-            bbddDesP.append(pathBBDDdescriptors)
-            queryDesP.append(pathQdescriptors)
             
             
         elif des == "texture":
             outputPath = outputPath + "_" + distance_func_vector + "_"
             
             namePath = "levels_" + str(levels) + "/" + "features_" + str(num_features) + "/"
-            pathBBDDdescriptors = args.descriptor_dir + "BBDD/" + texture_type + "/" + namePath
+            pathBBDDdescriptorsTexture = args.descriptor_dir + "BBDD/" + texture_type + "/" + namePath
             if args.background_rem == "no":
-                pathQdescriptors = args.descriptor_dir + queryName + "/texture/" + texture_type + "/" + namePath
+                pathQdescriptorsTexture = args.descriptor_dir + queryName + "/texture/" + texture_type + "/" + namePath
             else:
-                pathQdescriptors = args.descriptor_dir + queryName + "/texture/" + texture_type + "_" + background_func + "/" + namePath
+                pathQdescriptorsTexture = args.descriptor_dir + queryName + "/texture/" + texture_type + "_" + background_func + "/" + namePath
                 
-            bbddDesP.append(pathBBDDdescriptors)
-            queryDesP.append(pathQdescriptors)
             
         elif des == "color":
             outputPath = outputPath + "_" + distance_func_vector + "_"
             
             pathDifferentHist = "level_" + str(levels) + "/" + hist_type + "_bins_" + str(bins_2d) + "/"
-            pathBBDDdescriptors = args.descriptor_dir + "BBDD/color/" + color_space + "/" + pathDifferentHist
+            pathBBDDdescriptorsColor = args.descriptor_dir + "BBDD/color/" + color_space + "/" + pathDifferentHist
             if args.background_rem == "no":
-                pathQdescriptors = args.descriptor_dir + queryName + "/color/" + color_space + "/" + pathDifferentHist
+                pathQdescriptorsColor = args.descriptor_dir + queryName + "/color/" + color_space + "/" + pathDifferentHist
             else:
-                pathQdescriptors = args.descriptor_dir + queryName + "/color/" + color_space + "_" + background_func + "/" + pathDifferentHist
+                pathQdescriptorsColor = args.descriptor_dir + queryName + "/color/" + color_space + "_" + background_func + "/" + pathDifferentHist
             
-            bbddDesP.append(pathBBDDdescriptors)
-            queryDesP.append(pathQdescriptors)
         
-    outputPath = outputPath[:-1]
+    outputPath = outputPath[:-1] + "/"
+    
+    
     
     if not os.path.exists(outputPath):
         os.makedirs(outputPath)
-        #computeRetrieval(bbddDesP, queryDesP, outputPath, distance_func_text_index, distance_func_vector)
+        
+        results = saveBestKmatchesNew(bbddDescriptorsPathText = pathBBDDdescriptorsText, bbddDescriptorsPathColor = pathBBDDdescriptorsColor, 
+                            bbddDescriptorsPathTexture = pathBBDDdescriptorsTexture, qDescriptorsPathText = pathQdescriptorsText, 
+                            qDescriptorsPathColor = pathQdescriptorsColor, qDescriptorsPathTexture = pathQdescriptorsTexture, 
+                            distanceFuncText = distance_func_text_index, distanceFuncColor = distance_func_vector, 
+                            distanceFuncTexture = distance_func_vector, weightText = 1, weightColor = 1, weightTexture = 1)
+        
+        store_in_pkl(outputPath + "result.pkl", results)
         
         print("Retrieval done!")
     
@@ -206,6 +215,9 @@ def computeRetrieval(args, queryName, des_combination, distance_func_text, dista
        
 
 def mainProcess():
+    # Noise reduction best method
+    noise_method = "optimized"
+    
     # Color best combination
     color_space = "cielab"
     hist_type = "2D"
@@ -231,9 +243,8 @@ def mainProcess():
     
     # Get list arguments
     map_k_values = [int(k) for k in args.map_k_values[1:-1].split(",")]
-
-
     des_combination = args.des_type[1:-1].split(",")
+    
     
     # Check if descriptor combination is valid
     for des_type in des_combination:
@@ -243,7 +254,20 @@ def mainProcess():
     
     # Get query name
     queryName = args.query_dir.split('/')[-2]
+    
+    # If images contain noise remove it
+    if args.noise == "yes":
         
+        outputPath = "./denoisedImages/" + noise_method + "/" + queryName + "/"
+        
+        # See if the images are already denoised
+        if not os.path.exists(outputPath):
+            os.makedirs(outputPath)
+            
+            denoiseImages(args.query_dir, outputPath, noise_method)
+            print("Images denoised!")
+        
+        args.query_dir = outputPath
         
     # Generate background masks
     if args.background_rem != "no":
@@ -301,13 +325,13 @@ def mainProcess():
         
         # Generate text descriptors of query if they are not generated
         genAndStoreTextDescriptors(args.descriptor_dir, args.query_dir, queryName, 
-                                   maskFolder, background_func, textBoxes, args.multiple_paintings)
+                                   textBoxes, maskFolder, background_func, args.multiple_paintings)
     
     
     # Compute retrieval       
     resultsPath = computeRetrieval(args, queryName, des_combination, distance_func_text, distance_func_text_index, 
                                    distance_func_vector, levels, num_features, texture_type, hist_type, bins_2d, 
-                                   color_space, background_func = None)
+                                   color_space, background_func)
     
     # Compute retrieval evaluation if there is GT result
     if args.gt_result != "None":
@@ -317,9 +341,11 @@ def mainProcess():
         
         
         # Read prediction results
-        predictedResults = read_pkl(resultsPath + "/result.pkl")
+        predictedResults = read_pkl(resultsPath + "result.pkl")
         
         print("Combination:")
+        if args.noise == "yes":
+            print("Noise removal method: ", noise_method)
         for des in des_combination:
             if des == "text":
                 print("Text distance function: ", distance_func_text)

@@ -1,13 +1,14 @@
 import numpy as np
 import os
 from mapk import mapkL
-from utils.managePKLfiles import store_in_pkl, read_pkl
-from utils.distanceTextMetrics import getDistance2Strings
+from utils.managePKLfiles import read_pkl
 from computeRetrieval import SimilarityFromDescriptors, SimilarityFromText
-from utils.distanceMetrics import EuclidianDistance, L1_Distance, X2_Distance, Hellinger_distance, Cosine_Similarity
 
 # New savesBestKmatches
-def saveBestKmatchesNew(bbddDescriptorsPathText = None, bbddDescriptorsPathColor = None, bbddDescriptorsPathTexture = None, qDescriptorsPathText = None, qDescriptorsPathColor = None, qDescriptorsPathTexture = None, k = 10, distanceFuncText = None, distanceFuncColor = None, distanceFuncTexture = None, weightText = 1, weightColor = 1, weightTexture = 1):
+def saveBestKmatchesNew(bbddDescriptorsPathText = None, bbddDescriptorsPathColor = None, bbddDescriptorsPathTexture = None, 
+                        qDescriptorsPathText = None, qDescriptorsPathColor = None, qDescriptorsPathTexture = None, k = 10, 
+                        distanceFuncText = None, distanceFuncColor = None, distanceFuncTexture = None, weightText = 1, weightColor = 1, 
+                        weightTexture = 1):
     """ This function computes all the similarities between the database and query images
         using distances functions given and returns k best matches for every query image
     
@@ -72,17 +73,18 @@ def saveBestKmatchesNew(bbddDescriptorsPathText = None, bbddDescriptorsPathColor
             distance = 0
 
             # Calculate distance
-            if distanceFuncText != None:
+            if qDescriptorsPathText != None:
                 distanceText = SimilarityFromText(qDescriptorsPathText + fileQ,
                                                 bbddDescriptorsPathText + fileBBDD,False, distanceFuncText)
-                distance += weightText*distanceText
                 # Distance for text descriptors is in [0,1]
-            if distanceFuncColor != None:
+                distance += weightText*distanceText
+
+            if qDescriptorsPathColor != None:
                 distanceColor = SimilarityFromDescriptors(qDescriptorsPathColor + fileQ,
                                                 bbddDescriptorsPathColor + fileBBDD,False, distanceFuncColor)
                 # Distance for color descriptors is in [0,2]
                 distance += weightColor*(distanceColor/2)
-            if distanceFuncTexture != None:
+            if qDescriptorsPathTexture != None:
                 distanceTexture = SimilarityFromDescriptors(qDescriptorsPathTexture + fileQ,
                                                 bbddDescriptorsPathTexture + fileBBDD,False, distanceFuncTexture)
                 # Distance for texture descriptors is in [0,2]
@@ -103,7 +105,9 @@ def saveBestKmatchesNew(bbddDescriptorsPathText = None, bbddDescriptorsPathColor
     return result
     
 
-def bestCoefficient(bbddDescriptorsPathText = None, bbddDescriptorsPathColor = None, bbddDescriptorsPathTexture = None, qDescriptorsPathText = None, qDescriptorsPathColor = None, qDescriptorsPathTexture = None, k = 10, distanceFuncText = 1, distanceFuncColor = L1_Distance, distanceFuncTexture = L1_Distance):
+def bestCoefficient(bbddDescriptorsPathText = None, bbddDescriptorsPathColor = None, bbddDescriptorsPathTexture = None, 
+                    qDescriptorsPathText = None, qDescriptorsPathColor = None, qDescriptorsPathTexture = None, k = 10, 
+                    distanceFuncText = 1, distanceFuncColor = "l1", distanceFuncTexture = "l1"):
 
     """This function return the best weight for each descriptors (text, color, texture) in order to get the better mapkL value
 
@@ -228,16 +232,16 @@ def bestCoefficient(bbddDescriptorsPathText = None, bbddDescriptorsPathColor = N
 
 
 # Hog descriptors
-BBDDPathTexture = './descriptors/BBDD/hog/levels_3/features_160/'
-QPathTexture = './descriptors/qsd1_w3/hog/levels_3/features_160/'
+# BBDDPathTexture = './descriptors/BBDD/hog/levels_3/features_160/'
+# QPathTexture = './descriptors/qsd1_w3/hog/levels_3/features_160/'
 
-# Text descriptors
-BBDDPathText = './textDescriptors/BBDD_pny/'
-QPathText = './textDescriptors/denoisedImages/nlmean/qsd1_w3_npy/'
+# # Text descriptors
+# BBDDPathText = './textDescriptors/BBDD_pny/'
+# QPathText = './textDescriptors/denoisedImages/nlmean/qsd1_w3_npy/'
 
-# Color descriptors
-BBDDPathColor = './descriptors/BBDD/cielab/level_3/2D_bins_20/'
-QPathColor = './descriptors/qsd1_w3/cielab/level_3/2D_bins_20/'
+# # Color descriptors
+# BBDDPathColor = './descriptors/BBDD/cielab/level_3/2D_bins_20/'
+# QPathColor = './descriptors/qsd1_w3/cielab/level_3/2D_bins_20/'
 
 
 # result = saveBestKmatchesNew(bbddDescriptorsPathTexture = BBDDPathTexture,
