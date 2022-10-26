@@ -127,5 +127,5 @@ if __name__ == "__main__":
         if not os.path.exists(path_d2):
             os.makedirs(path_d2)
         for index,image in enumerate(denoised_images):
-            cv2.imwrite(path_d2 + jpgFiles[index] + str(index) + ".jpg", denoised_images[index])
+            cv2.imwrite(path_d2 + jpgFiles[index], denoised_images[index])
 

@@ -1,5 +1,13 @@
 import textdistance
 
+TEXT_DISTANCE_FUNCS = ["", "hamming", "mlipns", "levenshtein", "damerau_levenshtein", "jaro_winkler", 
+           "strcmp95", "needleman_wunsch", "gotoh", "smith_Waterman", "jaccard_index", "sorensen_Dice_coefficient",
+           "tversky_index", "overlap_coefficient", "tanimoto_distance", "cosine_similarity", "monge_elkan",
+           "bag_distance", "longest_common_subsequence_similarity", "longest_common_substring_similarity", 
+           "Ratcliff_Obershelp_similarity", "Arithmetic_coding", "RLE", "BWT_RLE", "Square_Root", "Entropy", 
+           "BZ2", "LZMA", "ZLib", "MRA", "Editex", "Prefix_similarity", "Postfix_similarity", "Length_distance", 
+           "Identity_similarity", "Matrix_similarity"]
+
 def getDistance2Strings(str1,str2,formula):
     if formula== 1:   #"hamming":
         result=textdistance.hamming.normalized_distance(str1, str2)
@@ -73,3 +81,4 @@ def getDistance2Strings(str1,str2,formula):
         result=textdistance.matrix.normalized_distance(str1, str2) 
                          
     return result
+

@@ -67,18 +67,21 @@ def get_binary_mask2(myimage):
 
 def get_binary_mask3(myimage):
     
+    
     myimage_hsv = cv2.cvtColor(myimage, cv2.COLOR_BGR2HSV)
      
     #Take S (saturation) and remove any value that is less than 100
     s = myimage_hsv[:,:,1]
     s = np.where(s < 100, 0, 1) 
  
-    # Take V (saturation) and remove any value that is more than 50
+    # Take V (value) and remove any value that is more than 50
     v = myimage_hsv[:,:,2]
-    v = np.where(v > 50, 0, 1)
+    v = np.where(v > 80, 0, 1)
  
     # Combine our two masks based on S and V into a single "Foreground"
     foreground = np.where(s+v > 0, 1, 0).astype(np.uint8)  #Casting back into 8bit integer
+    
+    foreground = cv2.morphologyEx(foreground, cv2.MORPH_CLOSE, np.ones([10,10]))
  
     background = np.where(foreground==0,255,0).astype(np.uint8) # Invert foreground to get background in uint8
     background = cv2.cvtColor(background, cv2.COLOR_GRAY2BGR)  # Convert background back into BGR space
@@ -88,17 +91,52 @@ def get_binary_mask3(myimage):
  
     # Post process the mask and return
     return postProcessMask(binary_mask[:,:,0])
+    #return binary_mask[:,:,0]
 
+
+# Method 4
+def get_binary_mask4(myimage):
+    myimageG = cv2.cvtColor(myimage, cv2.COLOR_BGR2GRAY)
+    hpfG = myimageG - cv2.GaussianBlur(myimageG, (21, 21), 3)+127
+    _, foreground1 = cv2.threshold(hpfG, np.max(hpfG)*5/9, 255, cv2.THRESH_BINARY)
+    _, foreground2 = cv2.threshold(hpfG, 255 - np.max(hpfG)*5/9, 255, cv2.THRESH_BINARY_INV)
+    foreground = np.where(foreground1+foreground2>0, 255, 0)
+    foreground = foreground.astype(np.uint8)
+    foreground = cv2.morphologyEx(foreground, cv2.MORPH_CLOSE, np.ones([1,20]))
+    foreground = cv2.morphologyEx(foreground, cv2.MORPH_CLOSE, np.ones([20,1]))
+    foreground = postProcessMask(foreground)
+    foreground = cv2.morphologyEx(foreground, cv2.MORPH_OPEN, np.ones([20,20]))
+    foreground = cv2.morphologyEx(foreground, cv2.MORPH_OPEN, np.ones([1,int(myimage.shape[1]/5)]))
+    foreground = cv2.morphologyEx(foreground, cv2.MORPH_OPEN, np.ones([int(myimage.shape[0]/5),1]))
+
+    return foreground
 
 # Giving a binary mask, it removes all not connected background areas with the most external
 # component
 def postProcessMask(binary_mask):
     checked = np.zeros(binary_mask.shape, dtype = np.uint8)
     background = np.zeros(binary_mask.shape, dtype = np.uint8) 
-    
-    queue = [(0,0)]
-    checked[0,0] = 255
-    background[0,0] = 255
+    queue = []
+    for i in range(binary_mask.shape[0]):
+        # Left
+        queue.append((i,0))
+        checked[i,0] = 255
+        background[i,0] = 255
+        # Right
+        queue.append((i,binary_mask.shape[1]-1))
+        checked[i,binary_mask.shape[1]-1] = 255
+        background[i,binary_mask.shape[1]-1] = 255
+        
+    for i in range(binary_mask.shape[1]):
+        # Top
+        queue.append((0,i))
+        checked[0,i] = 255
+        background[0,i] = 255
+        # Bot
+        queue.append((binary_mask.shape[0] - 1, i))
+        checked[binary_mask.shape[0] - 1, i] = 255
+        background[binary_mask.shape[0] - 1, i] = 255
+            
     
     while len(queue) > 0:
         i, j = queue.pop()
