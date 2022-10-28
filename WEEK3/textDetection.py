@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 import os
-from matplotlib import pyplot as plt
 from utils.managePKLfiles import store_in_pkl
 from getBiggestAreasContours import getBiggestContours
 

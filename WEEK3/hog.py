@@ -1,6 +1,5 @@
 from skimage.feature import hog
 import cv2
-import numpy as np
 
 def createHoGdescriptor(image, orientations, mask):
     """

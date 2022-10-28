@@ -2,11 +2,7 @@ import cv2
 import pytesseract
 import os
 import numpy as np
-from utils.managePKLfiles import read_pkl
 from utils.distanceTextMetrics import getDistance2Strings
-import textdistance
-from textDDetection import detectTextBoxes
-from mapk import mapkL
 from getBiggestAreasContours import getBiggestContours
 
 

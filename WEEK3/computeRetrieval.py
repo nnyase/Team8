@@ -2,8 +2,6 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt #importing matplotlib
 import os
-from mapk import mapkL
-from utils.managePKLfiles import read_pkl
 from utils.distanceTextMetrics import getDistance2Strings
 from utils.distanceMetrics import EuclidianDistance, L1_Distance, X2_Distance, Hellinger_distance, Cosine_Similarity
 

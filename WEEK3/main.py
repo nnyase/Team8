@@ -1,7 +1,6 @@
 import argparse
 import os
 from backgroundRemoval import generateBackgroundMasks
-from computeRetrieval import saveBestKmatches
 from utils.managePKLfiles import store_in_pkl, read_pkl
 from mapk import mapkL
 from metricsEval import load_images_from_folder, performance_accumulation_pixel, dir_path, metrics
@@ -15,12 +14,15 @@ from task4 import saveBestKmatchesNew
 from denoise import denoiseImages
 
 def parse_args():
-    parser = argparse.ArgumentParser(description= 'Descriptor generation')
+    parser = argparse.ArgumentParser(description= 'Computation')
     parser.add_argument('-bbddDir', '--BBDD_dir', type=str, help='Path of bbdd images')
     parser.add_argument('-qDir', '--query_dir', type=str, help='Path of query images')
     parser.add_argument('-dDir', '--descriptor_dir', type=str, default = "./descriptors/", help='Path where descriptors will be saved')
     parser.add_argument('-noise', '--noise', type=str, default = "no", help='Indicate if there is noise in images')
     parser.add_argument('-dType', '--des_type', type=str, default = "<color,texture,text>", help='Indicate the descriptor combination')
+    parser.add_argument('-wColor', '--weight_color', type=float, default = 1, help='Weight of the color descriptors in the combination')
+    parser.add_argument('-wTexture', '--weight_texture', type=float, default = 1, help='Weight of the texture descriptors in the combination')
+    parser.add_argument('-wText', '--weight_text', type=float, default = 1, help='Weight of the text descriptors in the combination')
     parser.add_argument('-tBox', '--text_boxes', default = "no", type = str, help='Indicate if text boxes has to be detected')
     parser.add_argument('-tBoxDir', '--text_boxes_dir', default = "./textBoxes/", type = str, help='Path where detected text boxes will be saved')
     parser.add_argument('-rDir', '--results_dir', type=str, default = "./results/", help='Path where retrieval results will be saved')
@@ -205,7 +207,8 @@ def computeRetrieval(args, queryName, des_combination, distance_func_text, dista
                         bbddDescriptorsPathTexture = pathBBDDdescriptorsTexture, qDescriptorsPathText = pathQdescriptorsText, 
                         qDescriptorsPathColor = pathQdescriptorsColor, qDescriptorsPathTexture = pathQdescriptorsTexture, 
                         distanceFuncText = distance_func_text_index, distanceFuncColor = distance_func_vector, 
-                        distanceFuncTexture = distance_func_vector, weightText = 1/2, weightColor = 1/6, weightTexture = 1/3)
+                        distanceFuncTexture = distance_func_vector, weightText = args.weight_text, weightColor = args.weight_color, 
+                        weightTexture = args.weight_texture)
     
     store_in_pkl(outputPath + "result.pkl", results)
         
