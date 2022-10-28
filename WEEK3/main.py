@@ -201,15 +201,15 @@ def computeRetrieval(args, queryName, des_combination, distance_func_text, dista
     if not os.path.exists(outputPath):
         os.makedirs(outputPath)
         
-        results = saveBestKmatchesNew(bbddDescriptorsPathText = pathBBDDdescriptorsText, bbddDescriptorsPathColor = pathBBDDdescriptorsColor, 
-                            bbddDescriptorsPathTexture = pathBBDDdescriptorsTexture, qDescriptorsPathText = pathQdescriptorsText, 
-                            qDescriptorsPathColor = pathQdescriptorsColor, qDescriptorsPathTexture = pathQdescriptorsTexture, 
-                            distanceFuncText = distance_func_text_index, distanceFuncColor = distance_func_vector, 
-                            distanceFuncTexture = distance_func_vector, weightText = 1, weightColor = 1, weightTexture = 1)
+    results = saveBestKmatchesNew(bbddDescriptorsPathText = pathBBDDdescriptorsText, bbddDescriptorsPathColor = pathBBDDdescriptorsColor, 
+                        bbddDescriptorsPathTexture = pathBBDDdescriptorsTexture, qDescriptorsPathText = pathQdescriptorsText, 
+                        qDescriptorsPathColor = pathQdescriptorsColor, qDescriptorsPathTexture = pathQdescriptorsTexture, 
+                        distanceFuncText = distance_func_text_index, distanceFuncColor = distance_func_vector, 
+                        distanceFuncTexture = distance_func_vector, weightText = 1/2, weightColor = 1/6, weightTexture = 1/3)
+    
+    store_in_pkl(outputPath + "result.pkl", results)
         
-        store_in_pkl(outputPath + "result.pkl", results)
-        
-        print("Retrieval done!")
+    print("Retrieval done!")
     
     return outputPath
        
@@ -343,9 +343,11 @@ def mainProcess():
         # Read prediction results
         predictedResults = read_pkl(resultsPath + "result.pkl")
         
-        print("Combination:")
         if args.noise == "yes":
             print("Noise removal method: ", noise_method)
+        
+        print("Combination:")
+        print(args.des_type)
         for des in des_combination:
             if des == "text":
                 print("Text distance function: ", distance_func_text)
