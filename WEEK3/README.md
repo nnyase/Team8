@@ -15,7 +15,7 @@ main.py -bbddDir ../../WEEK1/BBDD/ -qDir ../../WEEK3/qsd2_w3/ -noise yes -dType 
 
 ``
  main.py [-h] [-bbddDir BBDD_DIR] [-qDir QUERY_DIR]
-               [-dDir DESCRIPTOR_DIR] [-noise NOISE] [-dType DES_TYPE]
+               [-dDir DESCRIPTOR_DIR] [-dTrans TRANSCRIPTION_DIR] [-noise NOISE] [-dType DES_TYPE]
                [-wColor WEIGHT_COLOR] [-wTexture WEIGHT_TEXTURE]
                [-wText WEIGHT_TEXT] [-tBox TEXT_BOXES]
                [-tBoxDir TEXT_BOXES_DIR] [-rDir RESULTS_DIR] [-rK RESULT_K]
@@ -32,9 +32,11 @@ Options:
   -bbddDir BBDD_DIR, --BBDD_dir BBDD_DIR
                         Path of bbdd images.
   -qDir QUERY_DIR, --query_dir QUERY_DIR
-                        Path of query images
+                        Path of query images.
   -dDir DESCRIPTOR_DIR, --descriptor_dir DESCRIPTOR_DIR
                         Path where descriptors will be saved. The default value is ./descriptors/.
+  -dTrans TRANSCRIPTION_DIR, --transcription_dir TRANSCRIPTION_DIR
+                        Path where text transcriptions will be saved. The default value is ./textTranscriptions/.
   -noise NOISE, --noise NOISE
                         Indicate if there is noise in images. The default value is "no".
   -dType DES_TYPE, --des_type DES_TYPE

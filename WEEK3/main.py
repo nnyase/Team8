@@ -12,12 +12,14 @@ from OCR import computeTextDescriptorsFromImages, computeTextDescriptorsFromTxtF
 from utils.distanceTextMetrics import TEXT_DISTANCE_FUNCS
 from task4 import saveBestKmatchesNew
 from denoise import denoiseImages
+import numpy as np
 
 def parse_args():
     parser = argparse.ArgumentParser(description= 'Computation')
     parser.add_argument('-bbddDir', '--BBDD_dir', type=str, help='Path of bbdd images')
     parser.add_argument('-qDir', '--query_dir', type=str, help='Path of query images')
     parser.add_argument('-dDir', '--descriptor_dir', type=str, default = "./descriptors/", help='Path where descriptors will be saved')
+    parser.add_argument('-dTrans', '--transcription_dir', type=str, default = "./textTranscriptions/", help='Path where text transcriptions will be saved')
     parser.add_argument('-noise', '--noise', type=str, default = "no", help='Indicate if there is noise in images')
     parser.add_argument('-dType', '--des_type', type=str, default = "<color,texture,text>", help='Indicate the descriptor combination')
     parser.add_argument('-wColor', '--weight_color', type=float, default = 1, help='Weight of the color descriptors in the combination')
@@ -70,6 +72,44 @@ def evaluateBackgroundMasks(gt_masks, maskFolder, background_func):
     
     # Calculate Precision, Recall, F1
     metrics(TP,FN,FP)
+    
+# From text descriptors generates the transcriptions
+def generateTranscriptions(transcription_dir, descriptor_dir, queryName, maskFolder, background_func):
+    
+    # Get text descriptor folder
+    if not(maskFolder is None):
+        folderName = background_func + "/"
+    else:
+        folderName = "" 
+        
+    textDescriptorPath = descriptor_dir + queryName + "/text/" + folderName
+    
+    outputPath = transcription_dir + queryName + "/"
+    
+    if not os.path.exists(outputPath):
+        os.makedirs(outputPath)
+    
+        fileList = sorted(os.listdir(textDescriptorPath))
+        textFile = None
+        
+        for file in fileList:
+            fileNameParts = file.split('.')[0].split('_')
+            if int(fileNameParts[1]) == 0:
+                if textFile is not None:
+                    textFile.close()
+                    
+                textFile = open(outputPath + fileNameParts[0] + ".txt", 'w')
+                
+                transcription = str(np.load(textDescriptorPath + file))
+                
+                textFile.write(transcription)
+            else:
+                transcription = str(np.load(textDescriptorPath + file))
+                
+                textFile.write("\n" + transcription)
+        
+        print("Transcriptions generated!")
+        
     
 # Generate color descriptors taking into account the folder management
 def genAndStoreColorDescriptors(color_space, hist_type, bins_2d, levels, descriptor_dir, images_dir, database_name, 
@@ -329,6 +369,10 @@ def mainProcess():
         # Generate text descriptors of query if they are not generated
         genAndStoreTextDescriptors(args.descriptor_dir, args.query_dir, queryName, 
                                    textBoxes, maskFolder, background_func, args.multiple_paintings)
+        
+        
+        # Generate transcriptions
+        generateTranscriptions(args.transcription_dir, args.descriptor_dir, queryName, maskFolder, background_func)
     
     
     # Compute retrieval       
