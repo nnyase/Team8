@@ -217,6 +217,8 @@ def generateBackgroundMasks(imagesPath, masksPath, method):
                     binary_mask =  get_binary_mask2(image)
                 elif method == "method3":
                     binary_mask =  get_binary_mask3(image)
+                elif method == "method4":
+                    binary_mask =  get_binary_mask4(image)
                     
                 # Save the mask
                 cv2.imwrite(filename, binary_mask)

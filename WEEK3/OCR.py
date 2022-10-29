@@ -6,7 +6,7 @@ from utils.distanceTextMetrics import getDistance2Strings
 from getBiggestAreasContours import getBiggestContours
 
 
-pytesseract.pytesseract.tesseract_cmd = r'C:/Users/inigo/anaconda3/envs/py38/Library/bin/tesseract.exe'
+pytesseract.pytesseract.tesseract_cmd = r'C:\Users\inigo\anaconda3\envs\M1_project\Library\bin\tesseract.exe'
 
 '''
                 This script contains three main functions :
