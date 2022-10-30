@@ -265,7 +265,7 @@ def mainProcess():
     color_space = "cielab"
     hist_type = "2D"
     distance_func_vector = "l1"
-    background_func = "method3"
+    background_func = "method4"
     bins_2d = 20
     levels = 3
     

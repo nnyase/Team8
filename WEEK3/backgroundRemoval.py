@@ -96,15 +96,28 @@ def get_binary_mask3(myimage):
 
 # Method 4
 def get_binary_mask4(myimage):
+    # Convert to grayscale
     myimageG = cv2.cvtColor(myimage, cv2.COLOR_BGR2GRAY)
+    
+    # Apply a Gaussian Blur and compute differences
     hpfG = myimageG - cv2.GaussianBlur(myimageG, (21, 21), 3)+127
+    
+    # Get maximum difference areas
     _, foreground1 = cv2.threshold(hpfG, np.max(hpfG)*5/9, 255, cv2.THRESH_BINARY)
     _, foreground2 = cv2.threshold(hpfG, 255 - np.max(hpfG)*5/9, 255, cv2.THRESH_BINARY_INV)
+    
+    # Maximum areas are contour of the paintings
     foreground = np.where(foreground1+foreground2>0, 255, 0)
     foreground = foreground.astype(np.uint8)
+    
+    # Close with vertical and horizontal kernels
     foreground = cv2.morphologyEx(foreground, cv2.MORPH_CLOSE, np.ones([1,20]))
     foreground = cv2.morphologyEx(foreground, cv2.MORPH_CLOSE, np.ones([20,1]))
+    
+    # Flood fill mask
     foreground = postProcessMask(foreground)
+    
+    # Open to remove noise
     foreground = cv2.morphologyEx(foreground, cv2.MORPH_OPEN, np.ones([20,20]))
     foreground = cv2.morphologyEx(foreground, cv2.MORPH_OPEN, np.ones([1,int(myimage.shape[1]/5)]))
     foreground = cv2.morphologyEx(foreground, cv2.MORPH_OPEN, np.ones([int(myimage.shape[0]/5),1]))
