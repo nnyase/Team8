@@ -218,7 +218,7 @@ def computeRetrieval(args, queryName, des_combination, distance_func_text, dista
             outputPath = outputPath + "_" + distance_func_vector + "_"
             
             namePath = "levels_" + str(levels) + "/" + "features_" + str(num_features) + "/"
-            pathBBDDdescriptorsTexture = args.descriptor_dir + "BBDD/" + texture_type + "/" + namePath
+            pathBBDDdescriptorsTexture = args.descriptor_dir + "BBDD/texture/" + texture_type + "/" + namePath
             if args.background_rem == "no":
                 pathQdescriptorsTexture = args.descriptor_dir + queryName + "/texture/" + texture_type + "/" + namePath
             else:
