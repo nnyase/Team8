@@ -2,89 +2,80 @@ import cv2
 
 
 
-def getKeypoints(keyPointType, image):
-    """
-    This function generates the keypoints of the image generated using the method given.
-
-    Parameters
-    ----------
-    keyPointType : str
-        Method to generate the keypoints.
-    image : numpy array (uint8)
-        Image to compute keypoints.
-
-    Returns
-    -------
-    keyPoints : list
-        List of detected keypoints.
-
-    """
+def SIFT(image):
     
-    # Get keypoint generation algorithm
-    if keyPointType == "harris_laplace":
-        
-        features = cv2.xfeatures2d.HarrisLaplaceFeatureDetector.create()
-        
-    elif keyPointType == "sift":
-        
-        features = cv2.SIFT_create()
-        
-    elif keyPointType == "surf":
-        
-        features = cv2.xfeatures2d.SURF_create(400)
-        
-    elif keyPointType == "star":
-        
-        features = cv2.xfeatures2d.StarDetector_create()
-
-    elif keyPointType == "orb":
-        
-        features = cv2.ORB_create()
-
-    # Get keypoints
-    keyPoints = features.detect(image)
+    features = cv2.SIFT_create(nfeatures = 3000)
+    kp, des = features.detectAndCompute(image, None)
     
-    return keyPoints
+    return des
+    
+def ORB(image):
+    
+    features = cv2.ORB_create()
+    kp, des = features.detectAndCompute(image, None)
+    
+    return des
+    
+def BRIEF(image):
+    
+    star = cv2.xfeatures2d.StarDetector_create()
+    brief = cv2.xfeatures2d.BriefDescriptorExtractor_create()
 
+    kp = star.detect(image)
+    kp, des = brief.compute(image, kp)
+    
+    return des
 
-def getDescriptors(descriptorType, keyPoints, image):
+def harrisLaplace(image):
+    
+    features = cv2.xfeatures2d.HarrisLaplaceFeatureDetector.create()
+    featuresSIFT = cv2.SIFT_create(nfeatures = 3000)
+    
+    kp = features.detect(image)
+    kp, des = featuresSIFT.compute(image, kp)
+    
+    return des
+
+descriptor_types = {'sift': SIFT, 
+                   'orb': ORB,
+                   'brief': BRIEF,
+                   'harrisLaplace': harrisLaplace}
+
+def generateDescriptors(descriptorType, image):
     """
-    This function generates the descriptors of the image generated using the keypoints and method given.
+    This function generates the descriptors of the image generated using the method given.
 
     Parameters
     ----------
     descriptorType : str
         Method to generate the descriptors.
-    keyPoints : list
-        List of the keypoints of the image.
     image : numpy array (uint8)
-        Image to compute keypoints.
+        Image to compute descriptors.
 
     Returns
     -------
-    des : list
-        List of generated descriptors.
+    des : numpy array
+        List of the descriptors of the detected keypoints.
 
     """
     
-    # Get descriptor generation algorithm
-    if descriptorType == "sift":
-        
-        features = cv2.SIFT_create()
-        
-    elif descriptorType == "surf":
-        
-        features = cv2.xfeatures2d.SURF_create(400)
-        
-    elif descriptorType == "brief":
-        
-        features = cv2.xfeatures2d.BriefDescriptorExtractor_create()
-
-    elif descriptorType == "orb":
-        
-        features = cv2.ORB_create()
-
-    # Get descriptors
-    keyPoints, des = features.compute(image, keyPoints)
+    des = descriptor_types[descriptorType](image)
     
     return des
+
+
+
+def testDescriptors():
+    desMethods = ["harrisLaplace", "sift", "brief", "orb"]
+    
+    
+    img = cv2.imread("../../WEEK4/qsd1_w4/00000.jpg")
+    
+        
+        
+    for desMethod in desMethods:
+        
+        
+        descriptors = generateDescriptors(desMethod, img)
+
+testDescriptors()
