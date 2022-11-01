@@ -1,6 +1,9 @@
 import cv2
+from matplotlib import pyplot as plt
 import numpy as np
 import os
+
+from utils.metricsEval import performance_accumulation_pixel, metrics, read_images_from_dir
 
 # METHOD 1
 # Obtain the binary mask of an image
@@ -192,7 +195,77 @@ def postProcessMask(binary_mask):
     return bg
                 
         
-                
+#TODO new method 
+#metricsEval.py
+
+# Method 5 : comes from team 9
+
+def crop_img(image_array,top,bottom,left,right):
+    """ Cuts off the specified amount of pixels of an image
+        top,bottom,keft,right: amount of px to crop in each direction
+        
+    """
+    height = image_array.shape[0]
+    width = image_array.shape[1]
+    cropped_image = image_array[int(top):int(height-bottom),int(left):int(width-right)]
+    return cropped_image
+
+def get_binary_mask5(img):
+    """
+    Given an image, the gradient of its grayscale version is computed (edges of the image) and they are expanded with morphological operations
+    """
+        
+    img_greyscale = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    #define kernels
+    kernel_size_close = 20
+    kernel_size_close2 = 100
+    kernel_size_remove = 1500
+    kernel_size_open = 70
+    
+    
+    gradient_kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(5,5))
+    kernel_close = cv2.getStructuringElement(cv2.MORPH_RECT,(kernel_size_close,kernel_size_close))
+    kernel_close2 = cv2.getStructuringElement(cv2.MORPH_RECT,(kernel_size_close2,kernel_size_close2))
+    kernel_open = cv2.getStructuringElement(cv2.MORPH_RECT,(kernel_size_open,kernel_size_open))
+    
+    kernel_close_vert = cv2.getStructuringElement(cv2.MORPH_RECT,(2,kernel_size_remove))
+    kernel_close_hor = cv2.getStructuringElement(cv2.MORPH_RECT,(kernel_size_remove,2))
+
+    #obtain gradient of grayscale image
+    gradient = cv2.morphologyEx(img, cv2.MORPH_GRADIENT, gradient_kernel)
+    
+    #binarise gradient
+    temp, gradient_binary = cv2.threshold(gradient,30,255,cv2.THRESH_BINARY)
+    mask = gradient_binary[:,:,0]
+    
+
+    #add zero padding for morphology tasks 
+    padding = 1500
+    mask = cv2.copyMakeBorder( mask,  padding, padding, padding, padding, cv2.BORDER_CONSTANT, None, value = 0)
+    
+    #slight closing to increase edge size
+    mask =cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel_close)
+    
+    #really wide closing in horizontal and vertical directions
+    temp1 = mask =cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel_close_vert)
+    
+    temp2 = mask =cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel_close_hor)
+
+    #the mask will be the intersection
+    mask = cv2.bitwise_and(temp1, temp2)
+    
+    #small opening and closing
+    mask = mask =cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel_open)
+    mask =cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel_close2)
+    mask = crop_img(mask ,padding,padding,padding,padding)
+
+    mask = mask.astype(np.uint8)
+
+    return mask
+
+
+
 def generateBackgroundMasks(imagesPath, masksPath, method):
     """ This functions creates the masks of the background of images and stores them in the output folder.
     
@@ -216,9 +289,9 @@ def generateBackgroundMasks(imagesPath, masksPath, method):
     files = os.listdir(imagesPath)
 
     for file in files:
+
             # Check if it is an image 
             if file[-4:] == ".jpg":
-
                 # Read the image
                 image = cv2.imread(imagesPath + file)
 
@@ -232,10 +305,16 @@ def generateBackgroundMasks(imagesPath, masksPath, method):
                     binary_mask =  get_binary_mask3(image)
                 elif method == "method4":
                     binary_mask =  get_binary_mask4(image)
+                elif method == "method5":
+                    binary_mask =  get_binary_mask5(image)
                     
                 # Save the mask
                 cv2.imwrite(filename, binary_mask)
 
+# For generating masks
 
-    
+# generateBackgroundMasks('WEEK4/denoisedImages/optimized/qsd1_w4/', 'WEEK4/masks/qsd1_w4/method5/', "method5")
 
+# Test background removal performance
+
+# python3 metricsEval.py -aDir ../masks/qsd1_w4/actual -pDir ../masks/qsd1_w4/method5
