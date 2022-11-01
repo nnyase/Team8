@@ -50,15 +50,18 @@ def getBiggestContours(img):
         if area > minArea:
             foundContours.append(contourLocation(contour))
             # 2 Max contours
-            if len(foundContours) > 1:
+            if len(foundContours) > 2:
                 break
         else:
             break
 
     if len(foundContours)>1:
-        if foundContours[0][0] > foundContours[1][0]:
+        xMins = [foundContours[i][0] for i in range(len(foundContours))]
+        order = np.argsort(xMins)
+        foundContours = [foundContours[i] for i in order]
+        # if foundContours[0][0] > foundContours[1][0]:
             
-            foundContours[0], foundContours[1] = foundContours[1], foundContours[0]
+        #     foundContours[0], foundContours[1] = foundContours[1], foundContours[0]
     
     return foundContours
     

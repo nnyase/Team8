@@ -27,7 +27,7 @@ def detectText(image):
     imageS = imageHSV[:,:,1]
     
     # Threshold saturation with small values
-    imageSmallS = imageS < 20
+    imageSmallS = imageS < 37
     
     
     # Morphological gradients
@@ -102,7 +102,7 @@ def detectText(image):
         minY = 0
         maxY = 0
 
-    cv2.rectangle(image,(minX,minY),(maxX,maxY),[0,0,255],2)
+    cv2.rectangle(image,(minX,minY),(maxX,maxY),[0,0,255],5)
     
     return [minX, minY, maxX, maxY]
 

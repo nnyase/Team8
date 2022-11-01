@@ -103,11 +103,11 @@ def get_binary_mask4(myimage):
     myimageG = cv2.cvtColor(myimage, cv2.COLOR_BGR2GRAY)
     
     # Apply a Gaussian Blur and compute differences
-    hpfG = myimageG - cv2.GaussianBlur(myimageG, (21, 21), 3)+127
+    hpfG = myimageG - cv2.GaussianBlur(myimageG, (21, 21), 9)+127
     
     # Get maximum difference areas
-    _, foreground1 = cv2.threshold(hpfG, np.max(hpfG)*5/9, 255, cv2.THRESH_BINARY)
-    _, foreground2 = cv2.threshold(hpfG, 255 - np.max(hpfG)*5/9, 255, cv2.THRESH_BINARY_INV)
+    _, foreground1 = cv2.threshold(hpfG, np.max(hpfG)*6/11, 255, cv2.THRESH_BINARY)
+    _, foreground2 = cv2.threshold(hpfG, 255 - np.max(hpfG)*6/11, 255, cv2.THRESH_BINARY_INV)
     
     # Maximum areas are contour of the paintings
     foreground = np.where(foreground1+foreground2>0, 255, 0)
