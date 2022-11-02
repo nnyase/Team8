@@ -289,7 +289,7 @@ def mainProcess():
     color_space = "cielab"
     hist_type = "2D"
     distance_func_vector = "l1"
-    background_func = "method5"
+    background_func = "method4"
     bins_2d = 20
     levels = 3
     
@@ -368,6 +368,16 @@ def mainProcess():
         evaluateTextBoxes(args.gt_text_boxes, args.text_boxes_dir + "text_boxes.pkl")
     
     
+    # Generate text descriptors of query if they are not generated
+    genAndStoreTextDescriptors(args.descriptor_dir, args.query_dir, queryName, 
+                               textBoxes, maskFolder, background_func, args.multiple_paintings)
+    
+    
+    # Generate transcriptions
+    generateTranscriptions(args.transcription_dir, args.descriptor_dir, queryName, maskFolder, background_func)
+
+    
+    
     # Last week method
     if args.des_type == "old":
         
@@ -401,14 +411,7 @@ def mainProcess():
             # Generate text descriptors of BBDD if they are not already generated
             genAndStoreTextDescriptors(args.descriptor_dir, args.BBDD_dir, "BBDD")
             
-            # Generate text descriptors of query if they are not generated
-            genAndStoreTextDescriptors(args.descriptor_dir, args.query_dir, queryName, 
-                                       textBoxes, maskFolder, background_func, args.multiple_paintings)
             
-            
-            # Generate transcriptions
-            generateTranscriptions(args.transcription_dir, args.descriptor_dir, queryName, maskFolder, background_func)
-        
         
         # Compute retrieval       
         resultsPath = computeRetrieval(args, queryName, des_combination, distance_func_text, distance_func_text_index, 
