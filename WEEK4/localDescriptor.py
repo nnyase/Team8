@@ -8,6 +8,15 @@ def SIFT(image):
     kp, des = features.detectAndCompute(image, None)
     
     return des
+
+def SURF(image):
+    # Speeded version of SIFT = 3x faster that SIFT
+    # Here I set Hessian Threshold to 400
+    features = cv2.xfeatures2d.SURF_create(400)
+    # Find keypoints and descriptors directly
+    kp, des = features.detectAndCompute(image,None)
+
+    return des
     
 def ORB(image):
     
@@ -37,7 +46,8 @@ def harrisLaplace(image):
     return des
 
 
-descriptor_types = {'sift': SIFT, 
+descriptor_types = {'sift': SIFT,
+                   'surf':SURF,
                    'orb': ORB,
                    'brief': BRIEF,
                    'harrisLaplace': harrisLaplace}
