@@ -2,8 +2,8 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt #importing matplotlib
 import os
-from utils.distanceTextMetrics import getDistance2Strings
-from utils.distanceMetrics import EuclidianDistance, L1_Distance, X2_Distance, Hellinger_distance, Cosine_Similarity
+from distanceTextMetrics import getDistance2Strings
+from distanceMetrics import EuclidianDistance, L1_Distance, X2_Distance, Hellinger_distance, Cosine_Similarity, vectorNorm
 
 
 
@@ -28,6 +28,8 @@ def SimilarityFromDescriptors(path1,path2,activatePlot , distanceFunction):
         distanceFunction = Hellinger_distance
     elif distanceFunction == "cosSim":
         distanceFunction = Cosine_Similarity
+    elif distanceFunction == "vectorNorm":
+        distanceFunction = vectorNorm
         
     # Load descriptors
     DDBB = np.load(path1)
@@ -160,6 +162,8 @@ def saveBestKmatches(bbddDescriptorsPath, qDescriptorsPath, k, distanceFunc):
         distanceFunc = Hellinger_distance
     elif distanceFunc == "cosSim":
         distanceFunc = Cosine_Similarity
+    elif distanceFunc == "vectorNorm":
+        distanceFunc = vectorNorm
         
     # Init result list
     result = []
@@ -182,7 +186,7 @@ def saveBestKmatches(bbddDescriptorsPath, qDescriptorsPath, k, distanceFunc):
             # Calculate distance
             distance = SimilarityFromDescriptors(descriptors_Q1_Path,
                                                  descriptors_DDBB_Path,False, distanceFunc)
-            
+
             # Save distance
             distances[j] = distance
 
@@ -274,19 +278,14 @@ def saveBestKmatchesOld(bbddDescriptorsPath, qDescriptorsPath, k, distanceFunc):
     return result
 
 
+# #Compute pkl files for K best matches
+# bbddDescriptorsPath = 'WEEK4/descriptors/BBDD/local_descriptor/sift/'
+# qDescriptorsPath = 'WEEK4/descriptors/qsd1_w4/local_descriptor/sift_method4/'
+# k = 5
+# distanceFunc = 'vectorNorm'
 
 
-# BBDDPathColor = './descriptors/BBDD/cielab/level_3/2D_bins_20/'
-# QPathColor = './descriptors/qsd1_w3/cielab/level_3/2D_bins_20/'
-
-# result = saveBestKmatches(BBDDPathColor, QPathColor, 10, 'l1')
-# gtResults = read_pkl('./data/qsd1_w3/gt_corresps.pkl')
-# print(mapkL(gtResults, result, 10))
-
-
-
-
-
+# print(saveBestKmatches(bbddDescriptorsPath, qDescriptorsPath, k, distanceFunc))
 
 
 

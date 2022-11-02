@@ -1,7 +1,5 @@
 import cv2
 
-
-
 def SIFT(image):
     
     features = cv2.SIFT_create(nfeatures = 3000)
@@ -74,4 +72,5 @@ def generateLocalDescriptors(descriptorType, image):
     
     return des
 
-
+img = cv2.imread('WEEK4/denoisedImages/optimized/qsd1_w4/00000.jpg')
+SURF(img)
