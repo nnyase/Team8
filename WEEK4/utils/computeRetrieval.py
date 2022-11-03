@@ -2,8 +2,9 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt #importing matplotlib
 import os
-from distanceTextMetrics import getDistance2Strings
-from distanceMetrics import EuclidianDistance, L1_Distance, X2_Distance, Hellinger_distance, Cosine_Similarity
+
+from utils.distanceTextMetrics import getDistance2Strings
+from utils.distanceMetrics import EuclidianDistance, L1_Distance, X2_Distance, Hellinger_distance, Cosine_Similarity, vectorNorm
 
 
 ###############################################################################

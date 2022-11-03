@@ -272,7 +272,7 @@ def detectTextBoxes(inputPath, outputPath, multiplePaintings = "No", maskDir = N
             # For each painting detect text box
             for i, painting in enumerate(paintings):
                 
-                detection = detectText(painting)
+                detection = detectText2(painting)
                 
                 # If the paintings are cropped, get real positions
                 if multiplePaintings == "yes":
