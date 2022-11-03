@@ -1,9 +1,10 @@
 import numpy as np
 import cv2 as cv
 import matplotlib.pyplot as plt
-from mapk import mapk
-from managePKLfiles import read_pkl, store_in_pkl
+from utils.mapk import mapkL
+from utils.managePKLfiles import read_pkl, store_in_pkl
 import os
+
 def brutForceMatcher(path1,path2,function,thresholdVal): 
     """ 
         this function takes the descriptor of every feature in first set and is matched with all other features in second set 
@@ -47,7 +48,7 @@ def brutForceMatcher(path1,path2,function,thresholdVal):
                 matches = sorted(matches, key = lambda x:x.distance)
                 #Return the numbers of the matches found  
         
-    return len(good)
+    return -len(good)
 
 def brutForceMatcherKnn(path1,path2): 
     """ 
@@ -74,7 +75,7 @@ def brutForceMatcherKnn(path1,path2):
     # Apply ratio test
    
         for m,n in matches:
-            if m.distance < 0.9*n.distance:
+            if m.distance < 0.80*n.distance:
                 good.append([m])
     return -len(good)
 
@@ -135,8 +136,11 @@ def saveBestKmatches(bbddDescriptorsPath, qDescriptorsPath, k, distanceFunc):
         sortedIndexes = np.argsort(distances)
         
         # If distance too far put [-1]
-        if min(sorted(distances)) >-100 :
-            result.append([-1])
+        if min(sorted(distances)) >-50 :
+            if int(fileQ[:-4].split("_")[-1]) == 0:
+                result.append([[-1]])
+            else:
+                result[-1].append([-1])
         else:
             if int(fileQ[:-4].split("_")[-1]) == 0:
                 result.append([sortedIndexes[:k].tolist()])
@@ -151,5 +155,5 @@ path22="./descriptors/qsd1_w4/local_descriptor/sift_method4/"
 pathStore1 = './result/result_sift_brutForceMatcher.pkl' 
 pathStore2 = './result/gt_corresps.pkl'
 
-store_in_pkl(pathStore1, saveBestKmatches(path11, path22, 5, 1))
-print(mapk(read_pkl(pathStore1), read_pkl(pathStore2), k=5))
+store_in_pkl(pathStore1, saveBestKmatches(path11, path22, 10, 1))
+print(mapkL(read_pkl(pathStore2), read_pkl(pathStore1), k=5))
