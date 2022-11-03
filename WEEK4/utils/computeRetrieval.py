@@ -3,9 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt #importing matplotlib
 import os
 from distanceTextMetrics import getDistance2Strings
-from distanceMetrics import EuclidianDistance, L1_Distance, X2_Distance, Hellinger_distance, Cosine_Similarity, vectorNorm
-
-
+from distanceMetrics import EuclidianDistance, L1_Distance, X2_Distance, Hellinger_distance, Cosine_Similarity
 
 
 ###############################################################################
@@ -28,8 +26,6 @@ def SimilarityFromDescriptors(path1,path2,activatePlot , distanceFunction):
         distanceFunction = Hellinger_distance
     elif distanceFunction == "cosSim":
         distanceFunction = Cosine_Similarity
-    elif distanceFunction == "vectorNorm":
-        distanceFunction = vectorNorm
         
     # Load descriptors
     DDBB = np.load(path1)
@@ -162,8 +158,6 @@ def saveBestKmatches(bbddDescriptorsPath, qDescriptorsPath, k, distanceFunc):
         distanceFunc = Hellinger_distance
     elif distanceFunc == "cosSim":
         distanceFunc = Cosine_Similarity
-    elif distanceFunc == "vectorNorm":
-        distanceFunc = vectorNorm
         
     # Init result list
     result = []
@@ -192,8 +186,8 @@ def saveBestKmatches(bbddDescriptorsPath, qDescriptorsPath, k, distanceFunc):
 
         # Sort the distances and get k smallest values indexes
         sortedIndexes = np.argsort(distances)
-        
-        # Save results in the list
+
+
         if int(fileQ[:-4].split("_")[-1]) == 0:
             result.append([sortedIndexes[:k].tolist()])
         else:
@@ -271,22 +265,11 @@ def saveBestKmatchesOld(bbddDescriptorsPath, qDescriptorsPath, k, distanceFunc):
 
         # Sort the distances and get k smallest values indexes
         sortedIndexes = np.argsort(distances)
-        
+            
         # Save results in the list
         result[i][:] = sortedIndexes[:k].tolist()
     
     return result
-
-
-# #Compute pkl files for K best matches
-# bbddDescriptorsPath = 'WEEK4/descriptors/BBDD/local_descriptor/sift/'
-# qDescriptorsPath = 'WEEK4/descriptors/qsd1_w4/local_descriptor/sift_method4/'
-# k = 5
-# distanceFunc = 'vectorNorm'
-
-
-# print(saveBestKmatches(bbddDescriptorsPath, qDescriptorsPath, k, distanceFunc))
-
 
 
 

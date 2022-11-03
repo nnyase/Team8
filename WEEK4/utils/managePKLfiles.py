@@ -10,5 +10,4 @@ def store_in_pkl(pathStore, results):
 def read_pkl(sPath):
     with open(sPath, 'rb') as f:
         result = pickle.load(f)
-    
     return result

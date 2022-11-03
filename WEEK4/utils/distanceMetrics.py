@@ -1,9 +1,5 @@
-from numpy.linalg import norm
 from numpy import dot
 import numpy as np
-from task2 import flannMatcher
-from numpy.linalg import norm
-
 
 #EuclidianDistance
 def EuclidianDistance(hist1,hist2):
@@ -49,8 +45,3 @@ def Cosine_Similarity(con,testCon):
     #print("Cosine similarity")
     #print(cos_sim)
     return -cos_sim
-
-# L2 Norm of a Vector
-def vectorNorm(descriptors1, descriptors2):
-    vector = flannMatcher(descriptors1, descriptors2)
-    return norm(vector)
