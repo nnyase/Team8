@@ -1,6 +1,8 @@
 import numpy as np
 import cv2 as cv
 import matplotlib.pyplot as plt
+from mapk import mapk
+from managePKLfiles import read_pkl, store_in_pkl
 import os
 def brutForceMatcher(path1,path2,function,thresholdVal): 
     """ 
@@ -32,20 +34,22 @@ def brutForceMatcher(path1,path2,function,thresholdVal):
         bf = cv.BFMatcher(cv.NORM_, crossCheck=True)
     if function > 4:
         print ("Default selected: HAMMING")
-        bf = cv.BFMatcher(cv.NORM_HAMMING, crossCheck=True)
-   
-    # Match descriptors.
-    matches = bf.match(des1,des2)
+        bf = cv.BFMatcher(cv.NORM_HAMMING, crossCheck=False)
     good = []
-    for m in matches:
-        if m.distance < thresholdVal:
-            good.append([m])
-    # Sort them in the order of their distance.
-    matches = sorted(matches, key = lambda x:x.distance)
-    #Return the numbers of the matches found  
+    # Match descriptors.
+    if not((des1.size==0) or (des2.size==0)):
+        
+        matches = bf.match(des1,des2)
+        for m in matches:
+            if m.distance < thresholdVal:
+                good.append([m])
+                # Sort them in the order of their distance.
+                matches = sorted(matches, key = lambda x:x.distance)
+                #Return the numbers of the matches found  
+        
     return len(good)
 
-def brutForceMatcherKnn(path1,path2,thresholdVal): 
+def brutForceMatcherKnn(path1,path2): 
     """ 
         this function takes the descriptor of every feature in first set and is matched with all other features in second set 
         using some distance calculation, only taking into account those that are below our threshold value 
@@ -62,15 +66,19 @@ def brutForceMatcherKnn(path1,path2,thresholdVal):
     """
     des1 = np.load(path1,allow_pickle=True)
     des2 = np.load(path2,allow_pickle=True) 
-   
-    bf = cv.BFMatcher()
-    matches = bf.knnMatch(des1,des2,k=2)
-    # Apply ratio test
+    
     good = []
-    for m,n in matches:
-        if m.distance < thresholdVal*n.distance:
-            good.append([m])
-    return len(good)
+    bf = cv.BFMatcher()
+    if not (des1.size==0 or des2.size==0):
+        matches = bf.knnMatch(des1,des2,k=2)
+    # Apply ratio test
+   
+        for m,n in matches:
+            if m.distance < 0.9*n.distance:
+                good.append([m])
+    return -len(good)
+
+
 def saveBestKmatches(bbddDescriptorsPath, qDescriptorsPath, k, distanceFunc):
     """ This function computes all the similarities between the database and query images
         using the distance function given and returns k best matches for every query image
@@ -87,7 +95,7 @@ def saveBestKmatches(bbddDescriptorsPath, qDescriptorsPath, k, distanceFunc):
         Distance function that will be used to compute the similarities.
     Returns
     -------
-    result : list of lists (int)
+    result : list of lists of lists (int)
         The best k matches for each image in the query. The k matches are sorted from
         the most similar to the least one.
     """
@@ -96,12 +104,10 @@ def saveBestKmatches(bbddDescriptorsPath, qDescriptorsPath, k, distanceFunc):
     numBBDD = len(os.listdir(bbddDescriptorsPath))
     numQ = len(os.listdir(qDescriptorsPath))
     
-    # Create results list of lists
-    result = [[-1.]*k for i in range(numQ)]
     
-    path1="./descriptors/BBDD/local_descriptor/orb/bbdd_00286_0.npy"
-    path2="./descriptors/qsd1_w4/local_descriptor/orb_method3/00017_0.npy"
 
+    # Init result list
+    result = []
 
     # For every image in query
     for i, fileQ in enumerate(sorted(os.listdir(qDescriptorsPath))):
@@ -115,18 +121,12 @@ def saveBestKmatches(bbddDescriptorsPath, qDescriptorsPath, k, distanceFunc):
         # For every image in BBDD
         for j, fileBBDD in enumerate(sorted(os.listdir(bbddDescriptorsPath))):
             
-
             # Get descriptor path
             descriptors_DDBB_Path = bbddDescriptorsPath + fileBBDD
             
             # Calculate distance
-           
-            # #distance = matchesFound(descriptors_Q1_Path, descriptors_DDBB_Path)
-            # # distance = matchesFound(path1, path2)
-            #distance= brutForceMatcherKnn(descriptors_Q1_Path,descriptors_DDBB_Path,0.5)
-            distance=brutForceMatcher(descriptors_Q1_Path,descriptors_DDBB_Path,1,10)
-            
-            
+            distance= brutForceMatcherKnn(descriptors_Q1_Path,descriptors_DDBB_Path)
+            #distance=brutForceMatcher(descriptors_Q1_Path,descriptors_DDBB_Path,distanceFunc,thresholdVal)
             
             # Save distance
             distances[j] = distance
@@ -134,20 +134,22 @@ def saveBestKmatches(bbddDescriptorsPath, qDescriptorsPath, k, distanceFunc):
         # Sort the distances and get k smallest values indexes
         sortedIndexes = np.argsort(distances)
         
-        # Save results in the list
-        result[i][:] = sortedIndexes[:k].tolist()
+        # If distance too far put [-1]
+        if min(sorted(distances)) >-100 :
+            result.append([-1])
+        else:
+            if int(fileQ[:-4].split("_")[-1]) == 0:
+                result.append([sortedIndexes[:k].tolist()])
+            else:
+                result[-1].append(sortedIndexes[:k].tolist())
     
-    return result
+    return result  
 
 
+path11="./descriptors/BBDD/local_descriptor/sift/"
+path22="./descriptors/qsd1_w4/local_descriptor/sift_method4/"
+pathStore1 = './result/result_sift_brutForceMatcher.pkl' 
+pathStore2 = './result/gt_corresps.pkl'
 
-
-path1="./descriptors/BBDD/local_descriptor/orb/"
-path2="./descriptors/qsd1_w4/local_descriptor/orb_method3/"
-path11="./descriptors/BBDD/local_descriptor/orb/"
-path22="./descriptors/qsd1_w4/local_descriptor/orb_method3/"
-
-h=saveBestKmatches(path1, path2, 5, 5)
-#brutForceMatcher(path1,path2,1,5)
-# h=brutForceMatcherKnn(path1,path2,0.5) 
-# print(h)
+store_in_pkl(pathStore1, saveBestKmatches(path11, path22, 5, 1))
+print(mapk(read_pkl(pathStore1), read_pkl(pathStore2), k=5))
