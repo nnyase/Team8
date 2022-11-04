@@ -13,6 +13,7 @@ from utils.distanceTextMetrics import TEXT_DISTANCE_FUNCS
 from utils.combineDescriptors import saveBestKmatchesNew
 from denoise import denoiseImages
 import numpy as np
+from retrieveMatchesLen import saveBestKmatchesLocalDes, evaluateDiscardF1
 
 def parse_args():
     parser = argparse.ArgumentParser(description= 'Computation')
@@ -183,22 +184,23 @@ def genAndStoreTextDescriptors(descriptor_dir, images_dir, database_name, textBo
         print(database_name, " descriptors generated!")
 
 # Generate local descriptors
-def genAndStoreLocalDescriptors(descriptor_dir, images_dir, database_name, local_des_type, textBoxes = None,
-                           maskFolder = None, background_func = None, multiple_paintings = "no"):
+def genAndStoreLocalDescriptors(descriptor_dir, images_dir, database_name, local_des_type, max_num_keypoints,
+                                textBoxes = None, maskFolder = None, background_func = None, multiple_paintings = "no"):
     
     
     # Create folder
     if not(maskFolder is None):
-        folderName = local_des_type + "_" + background_func + "/"
+        folderName = local_des_type + "_" + background_func + "_" + str(max_num_keypoints) + "/"
     else:
-        folderName = local_des_type + "/" 
+        folderName = local_des_type + "_" + str(max_num_keypoints) + "/" 
+    
         
     folderPath = descriptor_dir + database_name + "/local_descriptor/" + folderName
     
     if not os.path.exists(folderPath):
         os.makedirs(folderPath)
         
-        computeLocalDescriptors(images_dir, folderPath, local_des_type,
+        computeLocalDescriptors(images_dir, folderPath, local_des_type, max_num_keypoints,
                            backgroundMaskDir = maskFolder, textBoxes = textBoxes, 
                            multipleImages= multiple_paintings)
         
@@ -276,7 +278,37 @@ def computeRetrieval(args, queryName, des_combination, distance_func_text, dista
     print("Retrieval done!")
     
     return outputPath
-       
+
+# Function to compute retrieval using the saved descriptors
+def computeRetrievalLocalDescriptors(args, queryName, local_des, max_num_keypoints, matchFunc, 
+                                     discardMinLen, background_func = None):
+    # Output path PKL file
+    outputPath = args.results_dir + queryName + "/" + local_des + "_" + str(max_num_keypoints) + "/" + matchFunc + "_" + str(discardMinLen) + "/"
+    
+    # Get descriptor paths
+    if not(background_func is None):
+        folderName = local_des + "_" + background_func + "_" + str(max_num_keypoints) + "/"
+    else:
+        folderName = local_des + "_" + str(max_num_keypoints) + "/" 
+
+    
+    pathBBDDdescriptors = args.descriptor_dir + "BBDD/local_descriptor/" + local_des + "_" + str(max_num_keypoints) + "/" 
+    pathQdescriptors = args.descriptor_dir + queryName + "/local_descriptor/" + folderName
+    
+    
+    
+    
+    if not os.path.exists(outputPath):
+        os.makedirs(outputPath)
+        
+    results = saveBestKmatchesLocalDes(pathBBDDdescriptors, pathQdescriptors, args.result_k, matchFunc, 
+                                       local_des, discardMinLen)
+    
+    store_in_pkl(outputPath + "result.pkl", results)
+        
+    print("Retrieval done!")
+    
+    return outputPath
 
 def mainProcess():
     
@@ -311,6 +343,9 @@ def mainProcess():
     
     # New descriptors
     local_des_types = ["orb", "sift", "brief", "harrisLaplace"]
+    max_num_keypoints = 300
+    discardMinLen = 50
+    matchFunc = "bfknn"
     
     # Check args
     if args.local_des_type != "all":
@@ -457,11 +492,52 @@ def mainProcess():
         for local_des in local_des_types:
             
             # Generate texture the descriptors of BBDD if they are not already generated
-            genAndStoreLocalDescriptors(args.descriptor_dir, args.BBDD_dir, "BBDD", local_des)
+            genAndStoreLocalDescriptors(args.descriptor_dir, args.BBDD_dir, "BBDD", local_des, max_num_keypoints)
             
             # Generate texture the descriptors of query if they are not generated
             genAndStoreLocalDescriptors(args.descriptor_dir, args.query_dir, queryName, 
-                                        local_des, textBoxes, maskFolder, background_func, args.multiple_paintings)
+                                        local_des, max_num_keypoints, textBoxes, maskFolder, background_func, 
+                                        args.multiple_paintings)
+            
+            
+            # Compute retrieval
+            resultsPath = computeRetrievalLocalDescriptors(args, queryName, local_des, max_num_keypoints, matchFunc, 
+                                                 discardMinLen, background_func)
+            
+            # Compute retrieval evaluation if there is GT result
+            if args.gt_result != "None":
+                
+                # Read GT 
+                gtResults = read_pkl(args.gt_result)
+                
+                
+                # Read prediction results
+                predictedResults = read_pkl(resultsPath + "result.pkl")
+                
+                if args.noise == "yes":
+                    print("Noise removal method: ", noise_method)
+                
+                print(local_des)
+                print("Max num keypoints: ", max_num_keypoints)
+                print("Matching func: ", matchFunc)
+                print("Min num matches: ", discardMinLen)
+                
+                F1, precision, recall = evaluateDiscardF1(predictedResults, gtResults)
+                
+                print("Discard precision: ", precision)
+                print("Discard recall: ", recall)
+                print("Discard F1 value: ", F1)
+                
+                    
+                
+                for k in map_k_values:
+                    # Compute mapk evaluation
+                    mapkValue = mapkL(gtResults, predictedResults, k)
+                    
+                    # Print results
+                    print("MAP%", k, " score is: ", mapkValue)
+            
+            
         
 
 if __name__ == "__main__":

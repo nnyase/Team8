@@ -76,8 +76,8 @@ def detectText2(image):
 
     cv2.rectangle(image,(minX,minY),(maxX,maxY),[0,0,255],5)
     
-    plt.imshow(image)
-    plt.show()
+    # plt.imshow(image)
+    # plt.show()
     
     return [minX, minY, maxX, maxY]
     

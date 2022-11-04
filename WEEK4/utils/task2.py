@@ -1,8 +1,8 @@
 import numpy as np
 import cv2 as cv
 from numpy.linalg import norm
-from mapk import mapk
-from distanceMetrics import EuclidianDistance, L1_Distance, X2_Distance, Hellinger_distance, Cosine_Similarity
+from utils.mapk import mapk
+from utils.distanceMetrics import EuclidianDistance, L1_Distance, X2_Distance, Hellinger_distance, Cosine_Similarity
 from managePKLfiles import read_pkl, store_in_pkl
 import os
 import matplotlib as plt

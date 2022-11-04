@@ -4,8 +4,7 @@ import matplotlib.pyplot as plt #importing matplotlib
 import os
 
 from utils.distanceTextMetrics import getDistance2Strings
-from utils.distanceMetrics import EuclidianDistance, L1_Distance, X2_Distance, Hellinger_distance, Cosine_Similarity, vectorNorm
-
+from utils.distanceMetrics import EuclidianDistance, L1_Distance, X2_Distance, Hellinger_distance, Cosine_Similarity
 
 ###############################################################################
 # By givin two descriptor paths to the "def SimilarityFromDescriptor" It'll   #

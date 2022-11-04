@@ -1,6 +1,5 @@
 from numpy import dot
 import numpy as np
-from utils.task2 import flannMatcher
 from numpy.linalg import norm
 
 

@@ -195,7 +195,7 @@ def computeTextureDescriptors(imagesPath, outputPath, textureType, levels, numFe
                 np.save(descriptorPath, descriptor)
 
 
-def computeLocalDescriptors(imagesPath, outputPath, descriptor_type, textBoxes = None,
+def computeLocalDescriptors(imagesPath, outputPath, descriptor_type, max_num_keypoints, textBoxes = None,
                        backgroundMaskDir = None, multipleImages = "no"):
     """
     This function computes the texture descriptors of the images in the given folder and store them in the output path.
@@ -208,6 +208,8 @@ def computeLocalDescriptors(imagesPath, outputPath, descriptor_type, textBoxes =
         Path where text descriptors will be saved.
     descriptor_type : str
         Which local descriptor type to use.
+    max_num_keypoints: int
+        Maximum number of keypoints detections per image.
     textBoxes : list, optional
         Detected text boxes. The default is None.
     backgroundMaskDir : str, optional
@@ -267,7 +269,7 @@ def computeLocalDescriptors(imagesPath, outputPath, descriptor_type, textBoxes =
                  
                     paintingNew[yMin:yMax + 1, xMin:xMax + 1] = [0, 0, 0]
                     
-                descriptor = generateLocalDescriptors(descriptor_type, paintingNew)
+                descriptor = generateLocalDescriptors(descriptor_type, max_num_keypoints, paintingNew)
                 
                 descriptorPath = outputPath + file[:-4] + "_" + str(i) + ".npy"
                 np.save(descriptorPath, descriptor)

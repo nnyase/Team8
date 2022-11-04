@@ -1,9 +1,9 @@
 import cv2
 import numpy as np
 
-def SIFT(image):
+def SIFT(image, max_num_keypoints):
     
-    features = cv2.SIFT_create(nfeatures = 300)
+    features = cv2.SIFT_create(nfeatures = max_num_keypoints)
     kp, des = features.detectAndCompute(image, None)
     
     if des is None:
@@ -11,7 +11,7 @@ def SIFT(image):
     
     return des
 
-def SURF(image):
+def SURF(image, max_num_keypoints):
     # Speeded version of SIFT = 3x faster that SIFT
     # Here I set Hessian Threshold to 400
     features = cv2.xfeatures2d.SURF_create(400)
@@ -23,9 +23,9 @@ def SURF(image):
     
     return des
     
-def ORB(image):
+def ORB(image, max_num_keypoints):
     
-    features = cv2.ORB_create()
+    features = cv2.ORB_create(nfeatures = max_num_keypoints)
     kp, des = features.detectAndCompute(image, None)
     
     if des is None:
@@ -33,7 +33,7 @@ def ORB(image):
     
     return des
     
-def BRIEF(image):
+def BRIEF(image, max_num_keypoints):
     
     star = cv2.xfeatures2d.StarDetector_create()
     brief = cv2.xfeatures2d.BriefDescriptorExtractor_create()
@@ -47,10 +47,10 @@ def BRIEF(image):
     
     return des
 
-def harrisLaplace(image):
+def harrisLaplace(image, max_num_keypoints):
     
-    features = cv2.xfeatures2d.HarrisLaplaceFeatureDetector.create(maxCorners=300)
-    featuresSIFT = cv2.SIFT_create(nfeatures = 300)
+    features = cv2.xfeatures2d.HarrisLaplaceFeatureDetector.create(maxCorners=max_num_keypoints)
+    featuresSIFT = cv2.SIFT_create()
     
     kp = features.detect(image)
     kp, des = featuresSIFT.compute(image, kp)
@@ -67,7 +67,7 @@ descriptor_types = {'sift': SIFT,
                    'brief': BRIEF,
                    'harrisLaplace': harrisLaplace}
 
-def generateLocalDescriptors(descriptorType, image):
+def generateLocalDescriptors(descriptorType, max_num_keypoints, image):
     """
     This function generates the descriptors of the image generated using the method given.
 
@@ -75,6 +75,8 @@ def generateLocalDescriptors(descriptorType, image):
     ----------
     descriptorType : str
         Method to generate the descriptors.
+    max_num_keypoints: int
+        Maximum number of keypoints detections per image.
     image : numpy array (uint8)
         Image to compute descriptors.
 
@@ -85,7 +87,7 @@ def generateLocalDescriptors(descriptorType, image):
 
     """
     
-    des = descriptor_types[descriptorType](image)
+    des = descriptor_types[descriptorType](image, max_num_keypoints)
     
     return des
 
