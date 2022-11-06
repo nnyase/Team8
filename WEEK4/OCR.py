@@ -85,7 +85,7 @@ def extractTextOnce(img,BBox):
     #roi = cv2.cvtColor(roi,cv2.COLOR_BGR2GRAY)
     #_, roiT = cv2.threshold(roi, 128, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     try:
-        text = pytesseract.image_to_string(roi)
+        text = pytesseract.image_to_string(roi, config= "--psm 7 -c tessedit_char_whitelist='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz ' ")
     except:
         text = ""
         

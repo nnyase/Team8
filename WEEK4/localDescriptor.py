@@ -6,6 +6,8 @@ def SIFT(image, max_num_keypoints):
     features = cv2.SIFT_create(nfeatures = max_num_keypoints)
     kp, des = features.detectAndCompute(image, None)
     
+    kpimg=cv2.drawKeypoints(image,kp,image,flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    
     if des is None:
         des = np.zeros([0,128], dtype = np.uint8)
     

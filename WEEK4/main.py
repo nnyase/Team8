@@ -208,7 +208,7 @@ def genAndStoreLocalDescriptors(descriptor_dir, images_dir, database_name, local
     
    
 # Function to compute retrieval using the saved descriptors
-def computeRetrieval(args, queryName, des_combination, distance_func_text, distance_func_text_index, distance_func_vector, levels,
+def computeRetrieval(args, queryName, des_combination, disThreshold, distance_func_text, distance_func_text_index, distance_func_vector, levels,
                      num_features, texture_type, hist_type, bins_2d, color_space, background_func = None):
     # Output path PKL file
     outputPath = args.results_dir + queryName + "/"
@@ -270,7 +270,7 @@ def computeRetrieval(args, queryName, des_combination, distance_func_text, dista
                         bbddDescriptorsPathTexture = pathBBDDdescriptorsTexture, qDescriptorsPathText = pathQdescriptorsText, 
                         qDescriptorsPathColor = pathQdescriptorsColor, qDescriptorsPathTexture = pathQdescriptorsTexture, 
                         distanceFuncText = distance_func_text_index, distanceFuncColor = distance_func_vector, 
-                        distanceFuncTexture = distance_func_vector, weightText = 0.5, weightColor = 0.1667, 
+                        distanceFuncTexture = distance_func_vector, disThreshold = disThreshold, weightText = 0.5, weightColor = 0.1667, 
                         weightTexture = 0.3333)
     
     store_in_pkl(outputPath + "result.pkl", results)
@@ -316,7 +316,7 @@ def mainProcess():
     noise_method = "optimized"
     
     # Old descriptors
-    
+    disThreshold = 0.25
     # Color best combination
     color_space = "cielab"
     hist_type = "2D"
@@ -333,7 +333,7 @@ def mainProcess():
     distance_func_text_index = 15
     distance_func_text = TEXT_DISTANCE_FUNCS[distance_func_text_index]
     
-    des_combination = ["text", "color", "texture"]
+    des_combination = "<text,color,texture>"
     
     
     
@@ -342,9 +342,9 @@ def mainProcess():
     
     
     # New descriptors
-    local_des_types = ["orb", "sift", "brief", "harrisLaplace"]
-    max_num_keypoints = 300
-    discardMinLen = 50
+    local_des_types = ["orb", "sift", "harrisLaplace" , "brief"]
+    max_num_keypoints = 2000
+    discardMinLen = 15
     matchFunc = "bfknn"
     
     # Check args
@@ -358,7 +358,7 @@ def mainProcess():
     
     # Get list arguments
     map_k_values = [int(k) for k in args.map_k_values[1:-1].split(",")]
-    des_combination = args.des_type[1:-1].split(",")
+    des_combination = des_combination[1:-1].split(",")
     
     
     # Get query name
@@ -449,7 +449,7 @@ def mainProcess():
             
         
         # Compute retrieval       
-        resultsPath = computeRetrieval(args, queryName, des_combination, distance_func_text, distance_func_text_index, 
+        resultsPath = computeRetrieval(args, queryName, des_combination, disThreshold, distance_func_text, distance_func_text_index, 
                                        distance_func_vector, levels, num_features, texture_type, hist_type, bins_2d, 
                                        color_space, background_func)
         
@@ -478,6 +478,11 @@ def mainProcess():
                     
                 print(des)
                 
+            F1, precision, recall = evaluateDiscardF1(predictedResults, gtResults)
+            
+            print("Discard precision: ", precision)
+            print("Discard recall: ", recall)
+            print("Discard F1 value: ", F1)
             
             for k in map_k_values:
                 # Compute mapk evaluation

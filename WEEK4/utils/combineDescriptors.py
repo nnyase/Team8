@@ -7,8 +7,8 @@ from utils.computeRetrieval import SimilarityFromDescriptors, SimilarityFromText
 # New savesBestKmatches
 def saveBestKmatchesNew(bbddDescriptorsPathText = None, bbddDescriptorsPathColor = None, bbddDescriptorsPathTexture = None, 
                         qDescriptorsPathText = None, qDescriptorsPathColor = None, qDescriptorsPathTexture = None, k = 10, 
-                        distanceFuncText = None, distanceFuncColor = None, distanceFuncTexture = None, weightText = 1, weightColor = 1, 
-                        weightTexture = 1):
+                        distanceFuncText = None, distanceFuncColor = None, distanceFuncTexture = None, disThreshold = 0,
+                        weightText = 1, weightColor = 1, weightTexture = 1):
     """ This function computes all the similarities between the database and query images
         using distances functions given and returns k best matches for every query image
     
@@ -27,6 +27,8 @@ def saveBestKmatchesNew(bbddDescriptorsPathText = None, bbddDescriptorsPathColor
         Distance function that will be used to compute the similarities of the color.
     distanceFuncTexture : function
         Distance function that will be used to compute the similarities of the texture.
+    disThreshold : float
+        Threshold of the minimum distance to be in the bbdd.
     weightText : float
         This float is in [0,1] and gives the importance of text compared to color and texture to find best matches
     weightColor : float
@@ -95,12 +97,19 @@ def saveBestKmatchesNew(bbddDescriptorsPathText = None, bbddDescriptorsPathColor
 
         # Sort the distances and get k smallest values indexes
         sortedIndexes = np.argsort(distances)
-            
-        # Save results in the list
-        if int(fileQ[:-4].split("_")[-1]) == 0:
-            result.append([sortedIndexes[:k].tolist()])
+           
+        # If distance too far put [-1]
+        if min(distances) > disThreshold:
+            if int(fileQ[:-4].split("_")[-1]) == 0:
+                result.append([[-1]])
+            else:
+                result[-1].append([-1])
         else:
-            result[-1].append(sortedIndexes[:k].tolist())
+            if int(fileQ[:-4].split("_")[-1]) == 0:
+                result.append([sortedIndexes[:k].tolist()])
+            else:
+                result[-1].append(sortedIndexes[:k].tolist())
+        
     
     return result
     

@@ -54,7 +54,7 @@ def evaluateDiscardF1(predicted, real):
     else:
         precision = TP/T
     if P == 0:
-        recall = 0
+        recall = 1
     else:
         recall = TP/P
     if precision + recall == 0:
@@ -148,13 +148,13 @@ def brutForceMatcherKnn(path1, path2, des_type):
         if not(len(matches) > 0 and len(matches[0])==1):
             # Apply ratio test
             for m,n in matches:
-                if m.distance < 0.80*n.distance:
+                if m.distance < 0.7*n.distance:
                     good.append([m])
                 
     return -len(good)
 
 #FLANN based Matcher
-def flannMatcher(path1, path2, des_type):
+def flannMatcherKnn(path1, path2, des_type):
 
     """
     this function takes the descriptor of every feature in first set and is matched with all other features in second set 
@@ -177,7 +177,7 @@ def flannMatcher(path1, path2, des_type):
     descriptors2 = np.load(path2)
 
     # FLANN parameters
-    if des_type == 'orb':
+    if des_type == 'orb' or des_type == "brief":
         #For ORB
         FLANN_INDEX_LSH = 6
         index_params= dict(algorithm = FLANN_INDEX_LSH,
@@ -193,15 +193,22 @@ def flannMatcher(path1, path2, des_type):
     flann = cv.FlannBasedMatcher(index_params,search_params)
 
     # Empty array => no matching so give a big vector to have a big distance
-    if not (descriptors1.size == 0 or descriptors2.size == 0):
-
-        matches = flann.knnMatch(descriptors1,descriptors2,k=2)
-
-        #Ratio test as per Lowe's paper
+    if descriptors1.shape[0] == 0  and descriptors2.shape[0] == 0:
+        
+        return -100
+    
+    if not((descriptors1.shape[0]<2) or (descriptors2.shape[0]<2)):
         good = []
-        for i,(m,n) in enumerate(matches):
-            if m.distance < 0.7*n.distance:
-                good.append([getattr(m,'distance')])
+        matches = flann.knnMatch(descriptors1,descriptors2,k=2)
+        
+        
+        
+        #Ratio test as per Lowe's paper
+        for i in range(len(matches)):
+            if len(matches[i])==2:
+                m,n = matches[i]
+                if m.distance < 0.7*n.distance:
+                    good.append([getattr(m,'distance')])
 
         return -len(good)
 
@@ -240,8 +247,8 @@ def saveBestKmatchesLocalDes(bbddDescriptorsPath, qDescriptorsPath, k, matchingF
         matchingFunc = brutForceMatcher
     elif matchingFunc == "bfknn":
         matchingFunc = brutForceMatcherKnn
-    elif matchingFunc == "flann":
-        matchingFunc = flannMatcher
+    elif matchingFunc == "flannknn":
+        matchingFunc = flannMatcherKnn
     
     # Compute number of images in each set
     numBBDD = len(os.listdir(bbddDescriptorsPath))
