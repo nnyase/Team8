@@ -7,4 +7,5 @@
  - Pierre Lammers
  - Michell Vargas
  - Ndivhuwo Nyase
+ - Lucas Snijder
  - Iñigo Auzmendi
