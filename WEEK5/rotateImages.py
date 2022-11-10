@@ -203,6 +203,7 @@ def getImageRotation(img):
     
     
     return angle
+
 def getPoints(img):
     """
 This function finds the points of the bottom Line of the painting.
@@ -224,12 +225,17 @@ pointCC,pointDD :
   
     # Detecting contours in image.
     contours, _= cv2.findContours(threshold, cv2.RETR_TREE,
-                               cv2.CHAIN_APPROX_SIMPLE)
+                                cv2.CHAIN_APPROX_SIMPLE)
+    # Find the index of the largest contour
+    areas = [cv2.contourArea(c) for c in contours]
+    max_index = np.argmax(areas)
+    cnt=contours[max_index]
+    
 
     # Going through every contours found in the image.
 
   
-    approx = cv2.approxPolyDP(contours[0], 0.009 * cv2.arcLength(contours[0], True), True)
+    approx = cv2.approxPolyDP(cnt, 0.009 * cv2.arcLength(cnt, True), True)
   
 # draws boundary of contours.
     cv2.drawContours(img, [approx], 0, (0, 0, 255), 5) 
