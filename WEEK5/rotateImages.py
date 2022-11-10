@@ -2,6 +2,7 @@ import cv2
 import os
 import numpy as np
 from matplotlib import pyplot as plt
+import math
 from utils.getBiggestAreasContours import getBiggestContours
 from utils.transformPoints import rotatePoints
 from utils.managePKLfiles import store_in_pkl
@@ -202,6 +203,186 @@ def getImageRotation(img):
     
     
     return angle
+def getPoints(img):
+    """
+This function finds the points of the bottom Line of the painting.
+
+Parameters
+----------
+img : cv2.imread (grayScaled image)
+
+Returns
+-------
+pointCC,pointDD :
+    Line points.
+
+"""
+    font = cv2.FONT_HERSHEY_COMPLEX
+    # Converting image to a binary image
+    # ( black and white only image).
+    _, threshold = cv2.threshold(img, 110, 255, cv2.THRESH_BINARY)
+  
+    # Detecting contours in image.
+    contours, _= cv2.findContours(threshold, cv2.RETR_TREE,
+                               cv2.CHAIN_APPROX_SIMPLE)
+
+    # Going through every contours found in the image.
+
+  
+    approx = cv2.approxPolyDP(contours[0], 0.009 * cv2.arcLength(contours[0], True), True)
+  
+# draws boundary of contours.
+    cv2.drawContours(img, [approx], 0, (0, 0, 255), 5) 
+   
+# Used to flatted the array containing
+ # the co-ordinates of the vertices.
+    n = approx.ravel() 
+    i = 0
+    pointA=[]
+    pointB=[]
+    pointC=[]
+    pointD=[]
+    vector=[]
+    auxVector=[]
+    for j in n :
+        if(i % 2 == 0):
+            x = n[i]
+            y = n[i + 1]
+  
+            # String containing the co-ordinates.
+            string = str(x) + " " + str(y) 
+  
+            if(i == 0):
+                # text on topmost co-ordinate.
+                cv2.putText(img, "top", (x, y),
+                            font, 0.5, (255, 0, 0)) 
+                pointA=(x,y)
+                auxVector.append(pointA)
+                vector.append(pow(((x*x)+(y*y)),(1/2)))
+            if(i == 2):
+                # text on remaining co-ordinates.
+                cv2.putText(img, string, (x, y), 
+                         font, 0.5, (0, 255, 0)) 
+                pointB=(x,y)
+                auxVector.append(pointB)
+                vector.append(pow(((x*x)+(y*y)),(1/2)))
+            if(i == 4):
+                # text on remaining co-ordinates.
+                cv2.putText(img, string, (x, y), 
+                         font, 0.5, (0, 255, 0))
+                pointC=(x,y)
+                auxVector.append(pointC)
+                vector.append(pow(((x*x)+(y*y)),(1/2)))
+                
+            if(i == 6):
+                # text on remaining co-ordinates.
+                cv2.putText(img, string, (x, y), 
+                         font, 0.5, (0, 255, 0))
+                pointD=(x,y)
+                auxVector.append(pointD)
+                vector.append(pow(((x*x)+(y*y)),(1/2)))
+
+        i = i + 1
+        #cv2.imshow('image2', img2) 
+        
+    tmp = max(vector)
+    index = vector.index(tmp)
+    tmp1 = min(vector)
+    index2 = vector.index(tmp1)
+    if index==0:
+        pointDD=pointA
+    if index==1:
+        pointDD=pointB
+    if index==2:
+        pointDD=pointC
+    if index==3:
+        pointDD=pointD
+        
+    if index2==0:
+        pointAA=pointA
+    if index2==1:
+        pointAA=pointB
+    if index2==2:
+        pointAA=pointC
+    if index2==3:
+        pointAA=pointD 
+    
+    auxIndex=[]
+    
+    for j in range(len(auxVector)):
+        if auxVector[j] != pointAA and auxVector[j] != pointDD:
+            auxIndex.append(auxVector[j])
+    
+    if auxIndex[0][0] < auxIndex[1][0]:
+        pointCC=auxIndex[0]
+    else:
+        pointCC=auxIndex[1]
+
+        
+    return pointCC,pointDD
+  
+
+def getImageRotation_2(img):
+    """
+This function finds the angle of rotation of a signle paiting 
+
+Parameters
+----------
+img : cv2.imread (grayScaled image)
+
+Returns
+-------
+Angle : angle of rotation 
+    L
+
+"""
+    
+    pointA,pointB=getPoints(img)
+    if pointA[1]==pointB[1]:
+        angle= 0
+    else:
+        x1=pointA[0]
+        y1=pointA[1]
+        x2=pointB[0]
+        y2=pointB[1]
+        a= x2-x1
+        if y1>y2:    
+            b= y1-y2
+            c= pow(((a*a)+(b*b)),(1/2))
+            c= pow(((a*a)+(b*b)),(1/2))
+            angle=math.degrees(math.acos(a/c))
+        else:
+            b= y2-y1
+            c= pow(((a*a)+(b*b)),(1/2))
+            angle= 180-math.degrees(math.acos(a/c))
+        
+    
+    
+    return angle
+
+def getImagesRotation_2(imagesPath):
+    """
+    This function finds the rotation angle of each image in the input path
+    Parameters
+    ----------
+    imagesPath : str
+        Background mask images path.
+    Returns
+    -------
+    angles : list
+        Rotation angles of the images.
+    """
+    angles = []
+    for imageP in sorted(os.listdir(imagesPath)):
+        
+        if imageP[-4:] == ".png":
+            
+            img = cv2.imread(imagesPath + imageP, cv2.IMREAD_GRAYSCALE)
+            angle = getImageRotation_2(img)
+            angles.append(angle)
+    
+    return angles
+
     
     
     
