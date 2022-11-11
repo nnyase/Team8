@@ -218,27 +218,18 @@ pointCC,pointDD :
     Line points.
 
 """
-    font = cv2.FONT_HERSHEY_COMPLEX
-    # Converting image to a binary image
-    # ( black and white only image).
-    _, threshold = cv2.threshold(img, 110, 255, cv2.THRESH_BINARY)
   
     # Detecting contours in image.
-    contours, _= cv2.findContours(threshold, cv2.RETR_TREE,
+    contours, _= cv2.findContours(img, cv2.RETR_TREE,
                                 cv2.CHAIN_APPROX_SIMPLE)
     # Find the index of the largest contour
     areas = [cv2.contourArea(c) for c in contours]
     max_index = np.argmax(areas)
     cnt=contours[max_index]
-    
-
-    # Going through every contours found in the image.
-
-  
     approx = cv2.approxPolyDP(cnt, 0.009 * cv2.arcLength(cnt, True), True)
   
 # draws boundary of contours.
-    cv2.drawContours(img, [approx], 0, (0, 0, 255), 5) 
+    cv2.drawContours(img, [approx], 0, (255, 255, 255), 5) 
    
 # Used to flatted the array containing
  # the co-ordinates of the vertices.
@@ -255,46 +246,33 @@ pointCC,pointDD :
             x = n[i]
             y = n[i + 1]
   
-            # String containing the co-ordinates.
-            string = str(x) + " " + str(y) 
-  
+            #  co-ordinates four points of the rectangle with no sequence    
             if(i == 0):
-                # text on topmost co-ordinate.
-                cv2.putText(img, "top", (x, y),
-                            font, 0.5, (255, 0, 0)) 
                 pointA=(x,y)
                 auxVector.append(pointA)
                 vector.append(pow(((x*x)+(y*y)),(1/2)))
             if(i == 2):
-                # text on remaining co-ordinates.
-                cv2.putText(img, string, (x, y), 
-                         font, 0.5, (0, 255, 0)) 
                 pointB=(x,y)
                 auxVector.append(pointB)
                 vector.append(pow(((x*x)+(y*y)),(1/2)))
             if(i == 4):
-                # text on remaining co-ordinates.
-                cv2.putText(img, string, (x, y), 
-                         font, 0.5, (0, 255, 0))
                 pointC=(x,y)
                 auxVector.append(pointC)
                 vector.append(pow(((x*x)+(y*y)),(1/2)))
                 
             if(i == 6):
-                # text on remaining co-ordinates.
-                cv2.putText(img, string, (x, y), 
-                         font, 0.5, (0, 255, 0))
                 pointD=(x,y)
                 auxVector.append(pointD)
                 vector.append(pow(((x*x)+(y*y)),(1/2)))
 
-        i = i + 1
-        #cv2.imshow('image2', img2) 
-        
+        i = i + 1        
     tmp = max(vector)
     index = vector.index(tmp)
     tmp1 = min(vector)
     index2 = vector.index(tmp1)
+    
+    #detect nearest and farthest points
+    # and use the farthest point as  second point of our line
     if index==0:
         pointDD=pointA
     if index==1:
@@ -315,10 +293,11 @@ pointCC,pointDD :
     
     auxIndex=[]
     
+    
     for j in range(len(auxVector)):
         if auxVector[j] != pointAA and auxVector[j] != pointDD:
             auxIndex.append(auxVector[j])
-    
+    # evaluate the last 2 points to find the first point of the line
     if auxIndex[0][0] < auxIndex[1][0]:
         pointCC=auxIndex[0]
     else:
@@ -388,6 +367,7 @@ def getImagesRotation_2(imagesPath):
             angles.append(angle)
     
     return angles
+
 
     
     
