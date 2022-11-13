@@ -87,6 +87,6 @@ def cluster(pathFolder,sadImagePath, happyImagePath, zenImagePath, crazyImagePat
     print(closest)
 
 
-# result = cluster('BBDD/',sadImagePath = 'BBDD/bbdd_00009.jpg',
-# happyImagePath = 'BBDD/bbdd_00167.jpg', zenImagePath = 'BBDD/bbdd_00047.jpg',
-# crazyImagePath = 'BBDD/bbdd_00086.jpg', nostalgicImagePath = 'BBDD/bbdd_00078.jpg')
+result = cluster('BBDD/',sadImagePath = 'BBDD/bbdd_00009.jpg',
+ happyImagePath = 'BBDD/bbdd_00167.jpg', zenImagePath = 'BBDD/bbdd_00047.jpg',
+ crazyImagePath = 'BBDD/bbdd_00086.jpg', nostalgicImagePath = 'BBDD/bbdd_00078.jpg')

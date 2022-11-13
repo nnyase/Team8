@@ -70,4 +70,4 @@ Options:
               
 ```
 
-In order to cluster the images into 5 clusters ``task4.py`` can be used.
+In order to cluster the images into 5 clusters ``clustering.py`` can be used.
