@@ -70,15 +70,15 @@ def detectText2(image):
     
     else:
         minX = 0
-        maxX = image.shape[1] - 1
+        maxX = 1
         minY = 0
-        maxY = image.shape[0] - 1
+        maxY = 1
     
 
-    cv2.rectangle(image,(minX,minY),(maxX,maxY),[0,0,255],5)
+    # cv2.rectangle(image,(minX,minY),(maxX,maxY),[0,0,255],5)
     
-    plt.imshow(image)
-    plt.show()
+    # plt.imshow(image)
+    # plt.show()
     
     return [minX, minY, maxX, maxY]
     
@@ -181,10 +181,10 @@ def detectText(image):
         minY = 0
         maxY = image.shape[0] - 1
 
-    cv2.rectangle(image,(minX,minY),(maxX,maxY),[0,0,255],5)
+    # cv2.rectangle(image,(minX,minY),(maxX,maxY),[0,0,255],5)
     
-    plt.imshow(image)
-    plt.show()
+    # plt.imshow(image)
+    # plt.show()
     
     return [minX, minY, maxX, maxY]
 
@@ -208,13 +208,19 @@ def getBiggestContour(binaryImage):
     biggestArea = -1    
     contours, _ = cv2.findContours(binaryImage, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     for contour in contours:
-        area = cv2.contourArea(contour)
+        width = max(contour[:,0,0]) - min(contour[:,0,0])
+        height = max(contour[:,0,1]) - min(contour[:,0,1])
         
-        if area > biggestArea:
+        # Rectangle contour
+        if width>2*height:
             
-            biggestArea = area
-            biggestContour = contour
+            area = cv2.contourArea(contour)
             
+            if area > biggestArea:
+                
+                biggestArea = area
+                biggestContour = contour
+                
             
     
     return biggestContour
@@ -293,13 +299,13 @@ def detectTextBoxes(inputPath, outputPath, angles, multiplePaintings = "No", mas
                     detection[2] += xMin
                     detection[3] += yMin
                     
-                    points =[[detection[2], detection[3]] , [detection[2],detection[1]], [detection[0], detection[1]], [detection[0], detection[3]]]  
+                    #points =[[detection[2], detection[3]] , [detection[2],detection[1]], [detection[0], detection[1]], [detection[0], detection[3]]]  
                 
                     # Rotate points to get the original coordinates
-                    transformedPoints = rotatePoints(angle, points, imageCenter)
+                    #transformedPoints = rotatePoints(angle, points, imageCenter)
                     
                     
-                resultsImage.append(transformedPoints)
+                resultsImage.append(detection)
                 
             results.append(resultsImage)
     

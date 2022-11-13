@@ -14,7 +14,7 @@ from utils.combineDescriptors import saveBestKmatchesNew
 from denoise import denoiseImages
 import numpy as np
 from retrieveMatchesLen import saveBestKmatchesLocalDes, evaluateDiscardF1
-from rotateImages import getImagesRotation, rotateImages, getFrames
+from rotateImages import getImagesRotation, getImagesRotation_2, rotateImages, getFrames
 
 def parse_args():
     parser = argparse.ArgumentParser(description= 'Computation')
@@ -36,7 +36,6 @@ def parse_args():
     parser.add_argument('-mapK', '--map_k_values', default="<1,5>", type=str, help='Which values of k use to evaluate using MAP')
     parser.add_argument('-gtR', '--gt_result', default = "None", type=str, help='Ground-truth result of query')
     parser.add_argument('-gtM', '--gt_masks', default="None", type = str, help="Path where ground-truth masks are")
-    parser.add_argument('-gtT', '--gt_text_boxes', default="None", type = str, help="Path where ground-truth text boxes are")
     parser.add_argument('-gtF', '--gt_frames', default="None", type = str, help="Path where ground-truth frames are")
     
 
@@ -450,11 +449,6 @@ def mainProcess():
     else:
         textBoxes = None
         
-    # Evaluate text boxes if there is GT
-    if args.gt_text_boxes != "None":
-        print("Text boxes: ")
-        evaluateTextBoxes(args.gt_text_boxes, args.text_boxes_dir + "text_boxes.pkl")
-    
     
     # Generate text descriptors of query if they are not generated
     genAndStoreTextDescriptors(args.descriptor_dir, args.query_dir, queryName, 
